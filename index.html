@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="GigaWorld-Policy: An Efficient Action-Centered World–Action Model">
+  <meta name="keywords" content="GigaAI, Robotics, Embodied AI, World Model, Policy">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GigaWorld-Policy</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg">
+
+  <style>
+    :root {
+      --bg0: #f6f8ff;
+      --bg1: #ffffff;
+      --panel: rgba(255, 255, 255, 0.75);
+      --panel-strong: rgba(255, 255, 255, 0.92);
+      --border: rgba(16, 24, 40, 0.12);
+      --text: rgba(16, 24, 40, 0.92);
+      --muted: rgba(16, 24, 40, 0.68);
+      --accent0: #4f46e5;
+      --accent1: #06b6d4;
+      --accent2: #10b981;
+      --shadow: 0 12px 34px rgba(16, 24, 40, 0.14);
+      --shadow-soft: 0 10px 24px rgba(16, 24, 40, 0.10);
+      --radius: 14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 720px at 18% -10%, rgba(79, 70, 229, 0.14), rgba(246, 248, 255, 0) 66%),
+                  radial-gradient(980px 620px at 90% 0%, rgba(6, 182, 212, 0.12), rgba(246, 248, 255, 0) 62%),
+                  radial-gradient(780px 520px at 55% 22%, rgba(16, 185, 129, 0.08), rgba(246, 248, 255, 0) 65%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(16, 24, 40, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(16, 24, 40, 0.06) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: 0.10;
+      transform: translateZ(0);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(520px 240px at 20% 10%, rgba(16, 185, 129, 0.10), transparent 62%),
+                  radial-gradient(700px 300px at 82% 0%, rgba(79, 70, 229, 0.10), transparent 64%);
+      opacity: 0.85;
+      transform: translateZ(0);
+    }
+
+    .section { position: relative; }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.35), rgba(79, 70, 229, 0.25), transparent);
+      opacity: 0.6;
+    }
+
+    .section .container { position: relative; z-index: 1; }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+    }
+
+    .navbar .navbar-item { color: var(--muted); font-weight: 600; }
+    .navbar .navbar-item:hover { color: var(--text); background: rgba(16, 24, 40, 0.04); }
+    .navbar .navbar-item:focus { color: var(--text); background: rgba(16, 24, 40, 0.04); }
+    .navbar .navbar-burger span { background: rgba(16, 24, 40, 0.72); }
+    .navbar-menu.is-active { background: rgba(255, 255, 255, 0.9); }
+
+    .tech-hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0b1220 0%, #0b2a4a 48%, #0b1220 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tech-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(1200px 540px at 50% 0%, rgba(79, 70, 229, 0.22), transparent 62%),
+                  radial-gradient(980px 520px at 65% 10%, rgba(6, 182, 212, 0.16), transparent 62%);
+      opacity: 1;
+    }
+
+    .tech-hero .hero-body { position: relative; z-index: 1; }
+
+    .publication-title {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(6, 182, 212, 0.95), rgba(79, 70, 229, 0.95));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+      font-family: "Castoro", serif;
+    }
+
+    .tech-hero .subtitle {
+      color: rgba(255, 255, 255, 0.82) !important;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .publication-authors a { color: rgba(255, 255, 255, 0.9); }
+    .publication-authors a:hover { color: #fff; }
+
+    .publication-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .publication-links .button.is-dark {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.92), rgba(6, 182, 212, 0.86));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    }
+
+    .publication-links .button.is-dark:hover {
+      filter: brightness(1.05);
+    }
+
+    .publication-links .button.is-static {
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
+    .publication-links .button .icon img { height: 1em; width: auto; }
+    body.lang-en .lang-zh { display: none !important; }
+    body.lang-zh .lang-en { display: none !important; }
+
+    .lang-toggle .button.lang-btn {
+      border: 1px solid rgba(16, 24, 40, 0.12);
+      background: rgba(255, 255, 255, 0.75);
+      color: rgba(16, 24, 40, 0.78);
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08);
+    }
+
+    .lang-toggle .button.lang-btn.is-active {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(6, 182, 212, 0.10)), rgba(255, 255, 255, 0.85);
+      border-color: rgba(79, 70, 229, 0.22);
+      color: rgba(16, 24, 40, 0.92);
+    }
+
+    .content { color: var(--muted); }
+    .content p, .content li { line-height: 1.6; }
+
+    .figure {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: var(--panel-strong);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .figure video { width: 100%; border-radius: 10px; display: block; }
+    .teaser video { width: 100%; border-radius: 12px; }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+      burgers.forEach((el) => {
+        el.addEventListener('click', () => {
+          const target = el.dataset.target;
+          const $target = document.getElementById(target);
+          el.classList.toggle('is-active');
+          $target.classList.toggle('is-active');
+        });
+      });
+
+      const langButtons = Array.prototype.slice.call(document.querySelectorAll('.lang-btn'), 0);
+      const setLang = (lang) => {
+        document.body.classList.remove('lang-en', 'lang-zh');
+        document.body.classList.add(`lang-${lang}`);
+        langButtons.forEach((b) => {
+          const isActive = b.dataset.lang === lang;
+          b.classList.toggle('is-active', isActive);
+          b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      };
+      langButtons.forEach((btn) => btn.addEventListener('click', () => setLang(btn.dataset.lang)));
+      setLang(document.body.classList.contains('lang-zh') ? 'zh' : 'en');
+    });
+  </script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="lang-en">
+
+<nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="#">
+      <strong>GigaAI</strong>
+    </a>
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarMenu" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="#abstract"><span class="lang-en">Abstract</span><span class="lang-zh">概要</span></a>
+      <a class="navbar-item" href="#architecture"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
+      <a class="navbar-item" href="#training"><span class="lang-en">Training</span><span class="lang-zh">训练</span></a>
+      <a class="navbar-item" href="#results"><span class="lang-en">Results</span><span class="lang-zh">结果</span></a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons has-addons lang-toggle">
+          <button class="button is-small lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button class="button is-small lang-btn" type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero tech-hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            <span class="lang-en">GigaWorld-Policy: An Efficient Action-Centered World–Action Model</span>
+            <span class="lang-zh">GigaWorld-Policy，性能最强的实时「世界-动作模型 WA」</span>
+          </h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><a href="https://github.com/open-gigaai" target="_blank" rel="noopener noreferrer">GigaAI</a></span>
+          </div>
+
+          <div class="publication-links" style="margin-top: 0.75rem;">
+            <span class="link-block">
+              <a href="#" aria-disabled="true" class="external-link button is-normal is-rounded is-dark is-static">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span class="lang-en">Paper (TBD)</span><span class="lang-zh">论文（待更新）</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://huggingface.co/open-gigaai" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon">
+                  <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face">
+                </span>
+                <span class="lang-en">Models</span><span class="lang-zh">模型</span>
+              </a>
+            </span>
+            <span class="link-block lang-en">
+              <a href="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-youtube"></i></span>
+                <span>Video</span>
+              </a>
+            </span>
+            <span class="link-block lang-zh">
+              <a href="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-youtube"></i></span>
+                <span>视频</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://github.com/GigaAI-research/GigaWorld-Policy" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span class="lang-en">Code</span><span class="lang-zh">代码</span>
+              </a>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="teaser" class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <figure class="image">
+        <video
+          class="lang-en"
+          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4"
+          controls
+          autoplay
+          muted
+          loop
+          playsinline
+        >
+          Your browser does not support the video tag.
+        </video>
+        <video
+          class="lang-zh"
+          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4"
+          controls
+          autoplay
+          muted
+          loop
+          playsinline
+        >
+          Your browser does not support the video tag.
+        </video>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="abstract">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3"><span class="lang-en">Abstract</span><span class="lang-zh">概要</span></h2>
+    <p class="lang-zh">
+      基于预训练视频生成骨干初始化的世界-动作模型（World–Action Models）在机器人策略学习中展现出巨大潜力。然而，现有方法存在两项关键瓶颈，限制了性能与实际部署：其一，需要同时对未来视觉动态与对应动作进行推理，带来显著的推理开销；其二，联合建模会耦合视觉与运动表征，使动作预测精度高度依赖未来视频预测质量。为此，我们提出 GigaWorld-Policy：一种以动作为中心的世界-动作模型，学习二维像素–动作动态，并支持仅动作解码以实现高效推理。我们的方法包含三项关键设计：（1）构建多层级的大规模机器人数据集，用于预训练动作条件的视频生成模型，并将其适配为机器人策略学习的骨干；（2）将策略训练拆解为两部分：模型基于当前观测预测未来动作序列，同时基于预测动作与当前观测生成未来视频；训练阶段联合使用动作预测与视频生成监督，提供更丰富的学习信号，并通过视觉动态约束鼓励更合理的动作；（3）推理阶段不再显式预测未来视频，仅保留动作预测过程。真实机器人平台实验表明，相较基线方法，GigaWorld-Policy 推理速度提升 $10\times$，单次推理仅需 $0.36$ 秒，同时任务成功率提升 $35\%$。
+    </p>
+    <p class="lang-en">
+      World–Action Models initialized from pre-trained video generation backbones have demonstrated remarkable potential for robot policy learning. However, existing approaches face two critical bottlenecks that hinder performance and practical deployment. First, simultaneous reasoning over both future visual dynamics and corresponding actions incurs substantial inference overhead. Second, joint modeling entangles visual and motion representations, making motion prediction accuracy heavily dependent on the quality of future video forecasts. Therefore, we introduce GigaWorld-Policy, an action-centered world–action model that learns 2D pixel–action dynamics while enabling action-only decoding for efficient inference. Our method features three key design innovations: (1) A multi-level, large-scale robot dataset is curated to pre-train an action-conditioned video generation model, which is then adapted as the backbone for robot policy learning; (2) We formulate robot policy training into two components: the model predicts future action sequences conditioned on the current observation, and generates future videos based on the predicted actions and the current observation. During training, the model is jointly supervised by action prediction and video generation, providing richer learning signals and encouraging more plausible actions through visual-dynamics constraints; (3) At inference time, we no longer explicitly predict future videos and retain only the action prediction process. Experimental evaluations on real-world robotic platforms demonstrate that GigaWorld-Policy achieves a $10\times$ speedup in inference compared to baseline methods, requiring merely $0.36$ seconds per inference, while simultaneously improving task success rates by $35\%$.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="architecture">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">
+      <span class="lang-en">01. Efficient World–Action Architecture</span>
+      <span class="lang-zh">01. 高效的世界-动作模型架构：10倍推理速度提升</span>
+    </h2>
+    <p class="lang-zh">
+      在 GigaWorld-Policy 中，我们创新性打造了新一代高效的世界-动作模型架构。不同于传统 WA 架构依赖低效、冗长的视频预测链路，GigaWorld-Policy 以动作为中心的模型范式突破了跨模态耦合瓶颈，从架构层面实现推理效率的跃迁式提升。
+    </p>
+    <p class="lang-en">
+      We build a new generation of efficient World–Action architecture for GigaWorld-Policy. Unlike prior WA models that rely on long and costly video prediction chains, our action-centered formulation breaks the cross-modal coupling bottleneck and delivers a leap in inference efficiency.
+    </p>
+    <p class="lang-zh">
+      GigaWorld-Policy 基于轻量级世界模型 GigaWorld-0.5 构建，通过多视角拼接的紧凑表征进行未来具身操作视频的高效预测，大幅降低推理阶段的显存占用与计算成本，为实际部署提供了工业级的稳定性与可扩展性。
+    </p>
+    <p class="lang-en">
+      GigaWorld-Policy is built on the lightweight world model GigaWorld-0.5. It uses compact multi-view representations to efficiently model future embodied interaction videos, substantially reducing memory footprint and compute cost for practical deployment.
+    </p>
+    <p class="lang-zh">
+      GigaWorld-Policy 在架构层面实现了统一化的多模态表征与协同建模。模型将视觉观测、机器人状态与动作序列共同映射到同一嵌入空间，使不同模态能够在同一 Transformer 主干下被一致地处理。由此，在底层结构上原生建立起跨模态语义对齐与信息融合，避免传统多分支架构中的模态割裂，并为策略学习提供更加稳定、紧耦合的表达基础。
+    </p>
+    <p class="lang-en">
+      The architecture unifies multimodal representations and joint modeling: visual observations, robot states, and action sequences are mapped into a shared embedding space and processed by a single Transformer backbone. This yields native cross-modal alignment and fusion, avoiding modality fragmentation and providing a more stable, tightly coupled basis for policy learning.
+    </p>
+    <p class="lang-zh">
+      首创“训繁推简”混合范式策略模型：训练阶段通过 Causal Mask（因果掩码）机制统一建模动作 Token 与未来视觉 Token，使动作预测受益于未来视觉动态带来的高密度监督信号；推理阶段完全舍弃视频预测分支，仅保留轻量化动作生成模块，避免长序列视觉 Token 推理带来的计算冗余。
+    </p>
+    <p class="lang-en">
+      We propose a “train complex, infer simple” hybrid paradigm: during training, a causal masking mechanism jointly models action tokens and future visual tokens so that action prediction benefits from dense supervision from future dynamics; during inference, we drop the video prediction branch entirely and keep only lightweight action generation, eliminating redundant computation from long visual-token decoding.
+    </p>
+    <p class="lang-zh">
+      与当前主流 WA 模型（如 Motus 及 Cosmos Policy）相比，GigaWorld-Policy 在保持策略质量的同时实现 10 倍推理速度提升，真正匹配机器人高频闭环控制的实时性需求。
+    </p>
+    <p class="lang-en">
+      Compared with mainstream WA models (e.g., Motus and Cosmos Policy), GigaWorld-Policy achieves a $10\times$ inference speedup without sacrificing policy quality, meeting the real-time requirements of high-frequency closed-loop robot control.
+    </p>
+
+    <figure class="image figure" style="margin-top: 1rem;">
+      <video
+        class="lang-en"
+        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-en.mp4"
+        controls
+        autoplay
+        muted
+        loop
+        playsinline
+      >
+        Your browser does not support the video tag.
+      </video>
+      <video
+        class="lang-zh"
+        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-cn.mp4"
+        controls
+        autoplay
+        muted
+        loop
+        playsinline
+      >
+        Your browser does not support the video tag.
+      </video>
+    </figure>
+
+    <div class="columns is-multiline" style="margin-top: 1rem;">
+      <div class="column is-4">
+        <figure class="image figure">
+          <img src="./assets/image1.png" alt="Figure 1">
+        </figure>
+      </div>
+      <div class="column is-4">
+        <figure class="image figure">
+          <img src="./assets/image2.png" alt="Figure 2">
+        </figure>
+      </div>
+      <div class="column is-4">
+        <figure class="image figure">
+          <img src="./assets/image3.png" alt="Figure 3">
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="training">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">
+      <span class="lang-en">02. Efficient Use of Video Data</span>
+      <span class="lang-zh">02. 高效利用视频数据：10倍训练速度提升</span>
+    </h2>
+    <p class="lang-zh">
+      GigaWorld-Policy 构建了分层式高效训练 Pipeline，旨在最大化挖掘视频数据在具身动作训练中的价值，让模型以更少数据、更短时间完成具身操作策略学习。该流程包含三个递进阶段：第一、第二阶段利用海量视频数据训练世界模型 GigaWorld-0.5；第三阶段在 GigaWorld-0.5 的基础上加入具身动作数据训练 GigaWorld-Policy。
+    </p>
+    <p class="lang-en">
+      GigaWorld-Policy adopts a hierarchical, efficient training pipeline to maximize the value of video data for embodied action learning, enabling faster learning with less labeled action data. The pipeline has three stages: Stage 1–2 train the world model GigaWorld-0.5 on large-scale video data, and Stage 3 adds embodied action data to train GigaWorld-Policy on top of GigaWorld-0.5.
+    </p>
+    <ol class="lang-zh">
+      <li>通用世界模型预训练：利用海量互联网视频数据，增强 GigaWorld-0.5 对通用物理规律与视觉动态的理解能力；</li>
+      <li>具身场景适配：依托千小时级多源操作视频（涵盖第一人称、真机及仿真数据）进行场景适配预训练，学习具身交互下的时空演变规律；</li>
+      <li>动作策略对齐：在 GigaWorld-0.5 基础上，仅需少量动作标签真机数据完成训练，对齐“观测 - 动作 - 未来视觉”的因果映射。</li>
+    </ol>
+    <ol class="lang-en">
+      <li>General world-model pre-training: leverage massive internet video data to strengthen GigaWorld-0.5’s understanding of generic physics and visual dynamics.</li>
+      <li>Embodied scene adaptation: pre-train on thousand-hour, multi-source manipulation videos (first-person, real-robot, and simulation data) to learn spatiotemporal evolution under embodied interactions.</li>
+      <li>Action-policy alignment: on top of GigaWorld-0.5, train with a small amount of real-robot action-labeled data to align the causal mapping of “observation – action – future visuals”.</li>
+    </ol>
+    <p class="lang-zh">
+      这种“基础能力大规模预训练 + 任务适配小样本微调”的分层范式，相较传统 VLA 训练方案，实现了整体训练效率 10 倍提升。
+    </p>
+    <p class="lang-en">
+      This layered paradigm—large-scale pre-training for general capability plus small-sample fine-tuning for task adaptation—yields a $10\times$ overall training-efficiency improvement over conventional VLA training pipelines.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="results">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">
+      <span class="lang-en">03. Real-Robot Success Rate</span>
+      <span class="lang-zh">03. 真机任务成功率高：30%成功率提升</span>
+    </h2>
+    <p class="lang-zh">
+      实验结果表明，GigaWorld-Policy 在「成功率 - 推理速度」权衡曲线上取得了最佳平衡，唯一同时实现了高成功率与实时控制频率。如图所示，在涵盖抓取、装配、整理等 4 类典型任务的评测中：
+    </p>
+    <p class="lang-en">
+      Experiments show that GigaWorld-Policy achieves the best trade-off between success rate and inference speed, uniquely combining high task success with real-time control frequency. As shown in the figure, across four representative tasks (grasping, assembly, and rearrangement, etc.):
+    </p>
+    <ul class="lang-zh">
+      <li>成功率显著领先：平均成功率达到 85% 以上，相较 Motus 与 Cosmos Policy 等主流 WA 模型（约 50%-55%）提升超过 30%。</li>
+      <li>突破实时控制阈值：相较 Motus 与 Cosmos Policy 的推理速度实现 10 倍速度跨越，使机器人更有效应对动态环境干扰与执行误差。</li>
+    </ul>
+    <ul class="lang-en">
+      <li>Significant success-rate gains: average success exceeds 85%, improving by over 30% absolute compared with mainstream WA models such as Motus and Cosmos Policy (about 50%–55%).</li>
+      <li>Real-time control throughput: achieves a $10\times$ speedup over Motus and Cosmos Policy, which is crucial for robustness under dynamic disturbances and execution errors.</li>
+    </ul>
+
+    <figure class="image figure" style="margin-top: 1rem;">
+      <img src="./assets/image4.jpeg" alt="Results figure">
+    </figure>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong>GigaWorld-Policy</strong> · <span class="lang-en">Project Page</span><span class="lang-zh">项目主页</span>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
