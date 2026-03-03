@@ -169,8 +169,16 @@
       color: rgba(16, 24, 40, 0.92);
     }
 
-    .content { color: var(--muted); }
-    .content p, .content li { line-height: 1.6; }
+    .content { color: var(--muted); font-size: 1.05rem; }
+    .content p { line-height: 1.75; margin: 0 0 1rem; }
+    .content p:last-child { margin-bottom: 0; }
+    .content li { line-height: 1.7; margin: 0.35rem 0; }
+    .content ul, .content ol { margin-top: 0.75rem; margin-bottom: 1rem; padding-left: 1.25rem; }
+    .content h2.title { letter-spacing: -0.01em; margin-bottom: 0.75rem; }
+    .content h2.title + p { margin-top: 0.4rem; }
+    .content strong { color: var(--text); }
+    .content a { color: rgba(6, 182, 212, 0.95); font-weight: 600; }
+    .content a:hover { color: rgba(16, 185, 129, 0.95); }
 
     .figure {
       border: 1px solid var(--border);
@@ -313,7 +321,7 @@
       <figure class="image">
         <video
           class="lang-en"
-          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4"
+          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-en.mp4"
           controls
           autoplay
           muted
@@ -324,7 +332,7 @@
         </video>
         <video
           class="lang-zh"
-          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4"
+          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-cn.mp4"
           controls
           autoplay
           muted
@@ -390,7 +398,7 @@
     <figure class="image figure" style="margin-top: 1rem;">
       <video
         class="lang-en"
-        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-en.mp4"
+        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4"
         controls
         autoplay
         muted
@@ -401,7 +409,7 @@
       </video>
       <video
         class="lang-zh"
-        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-cn.mp4"
+        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4"
         controls
         autoplay
         muted
@@ -412,22 +420,10 @@
       </video>
     </figure>
 
-    <div class="columns is-multiline" style="margin-top: 1rem;">
-      <div class="column is-4">
-        <figure class="image figure">
-          <img src="./assets/image1.png" alt="Figure 1">
-        </figure>
-      </div>
-      <div class="column is-4">
-        <figure class="image figure">
-          <img src="./assets/image2.png" alt="Figure 2">
-        </figure>
-      </div>
-      <div class="column is-4">
-        <figure class="image figure">
-          <img src="./assets/image3.png" alt="Figure 3">
-        </figure>
-      </div>
+    <div style="margin-top: 1rem;">
+      <figure class="image figure">
+        <img src="./assets/image1.png" alt="Figure 1">
+      </figure>
     </div>
   </div>
 </section>
@@ -454,12 +450,11 @@
       <li>Embodied scene adaptation: pre-train on thousand-hour, multi-source manipulation videos (first-person, real-robot, and simulation data) to learn spatiotemporal evolution under embodied interactions.</li>
       <li>Action-policy alignment: on top of GigaWorld-0.5, train with a small amount of real-robot action-labeled data to align the causal mapping of “observation – action – future visuals”.</li>
     </ol>
-    <p class="lang-zh">
-      这种“基础能力大规模预训练 + 任务适配小样本微调”的分层范式，相较传统 VLA 训练方案，实现了整体训练效率 10 倍提升。
-    </p>
-    <p class="lang-en">
-      This layered paradigm—large-scale pre-training for general capability plus small-sample fine-tuning for task adaptation—yields a $10\times$ overall training-efficiency improvement over conventional VLA training pipelines.
-    </p>
+
+
+    <figure class="image figure" style="margin-top: 1rem;">
+      <img src="./assets/image2.png" alt="Figure 2">
+    </figure>
   </div>
 </section>
 
