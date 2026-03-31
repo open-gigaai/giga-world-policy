@@ -3,6 +3,7 @@
 > **GigaWorld-Policy: An Efficient Action-Centered World-Action Model**
 
 [![arXiv](https://img.shields.io/badge/arXiv-2603.17240-b31b1b.svg)](https://arxiv.org/abs/2603.17240)
+[![Website](https://img.shields.io/badge/Website-Project_Page-blue.svg)](https://gigaai-research.github.io/GigaWorld-Policy/)
 
 ## 📖 Overview
 
