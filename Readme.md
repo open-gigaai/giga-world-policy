@@ -32,17 +32,54 @@ pip install ./third_party/giga-models
 pip install ./third_party/giga-datasets
 ```
 
+## 📊 Data Preprocessing
+
+Before training, you need to compute the normalization statistics and pre-compute the T5 text embeddings for your dataset.
+
+### 1. Compute Normalization Statistics
+
+This will generate a `norm_stats_delta.json` file which is required by the policy.
+
+```bash
+python -m scripts.compute_norm_stats \
+  --data_paths "/path/to/dataset_dir" \
+  --output_path "/path/to/norm_stats_delta.json" \
+  --embodiment_id {embodiment-id} \
+  --delta-mask {delta-mask} \
+  --sample-rate 1.0 \
+  --action-chunk 48 \
+```
+
+*   `--embodiment_id`: Check `compute_norm_stats.py` for the mapping from robot type to ID.
+*   `--delta_mask`: A boolean mask indicating which action dimensions are deltas (True) vs. absolute values (False).
+
+### 2. Compute T5 Embeddings
+
+This will pre-compute and save the T5 text embeddings for the language instructions in your dataset.
+
+```bash
+python -m scripts.compute_t5_embedding \
+  --repo_id "/path/to/dataset_dir" \
+  --root "/path/to/dataset_dir" \
+  --wan_path "/path/to/Wan2.2-TI2V-5B" \
+  --device "cuda" \
+  --text_len 512 \
+  --t5_folder_name "t5_embedding"
+```
+
 ## ⚙️ Configuration
 
-Before training, modify the config file `world_action_model/configs/example.py`:
+After completing the data preprocessing steps, modify the config file `world_action_model/configs/example.py` to point to the generated files and your model weights:
 
 | Parameter | Description |
 |-----------|-------------|
 | `models.pretrained` | Path to your pretrained model weights |
-| `transform.norm_path` | Path to dataset normalization statistics file |
-| `lerobot_data_paths` (data_dir) | Path to your dataset |
+| `transform.norm_path` | Path to the generated `norm_stats_delta.json` |
+| `data_dir` | Path to your dataset |
 
 ## 🚀 Training
+
+Once the data is preprocessed and the configuration is set, you can start training:
 
 ```bash
 python -m scripts.train --config world_action_model.configs.example.config

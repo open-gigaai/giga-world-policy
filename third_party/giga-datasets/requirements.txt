@@ -18,3 +18,4 @@ imageio
 pytorch_fid
 h5py
 matplotlib
+easydict
