@@ -105,7 +105,7 @@ class LeRobotDataset(BaseDataset):
                 robotype = robotype.strip()
             self.robotype = robotype
 
-            self.dataset = _LeRobotDataset(
+            self.dataset = FastLeRobotDataset(
                 repo_id,
                 root=self.data_path,
                 delta_timestamps=delta_timestamps,
