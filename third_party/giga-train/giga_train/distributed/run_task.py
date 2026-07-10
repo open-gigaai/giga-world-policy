@@ -16,6 +16,13 @@ def parse_args() -> argparse.Namespace:
 def run_tasks(config: str | Any, runners: str | Iterable[str] | None = None) -> None:
     from giga_train import Tester, Trainer, load_config, utils
 
+    try:
+        import world_action_model.datasets  # noqa: F401
+        import world_action_model.trainer  # noqa: F401
+        import world_action_model.transforms  # noqa: F401
+    except ImportError:
+        pass
+
     config = load_config(config)
     if runners is None:
         runners = config.runners

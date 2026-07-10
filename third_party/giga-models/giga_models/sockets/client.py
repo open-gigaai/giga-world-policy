@@ -17,7 +17,7 @@ class TorchSerializer:
     @staticmethod
     def from_bytes(data: bytes):
         buffer = BytesIO(data)
-        obj = torch.load(buffer, map_location='cpu')
+        obj = torch.load(buffer, map_location='cpu', weights_only=False)
         return obj
 
 

@@ -18,11 +18,8 @@ from typing import Any, Dict, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from diffusers.configuration_utils import ConfigMixin, register_to_config
 from diffusers.loaders import FromOriginalModelMixin, PeftAdapterMixin
-from diffusers.utils import USE_PEFT_BACKEND, deprecate, logging, scale_lora_layers, unscale_lora_layers
-from diffusers.utils.torch_utils import maybe_allow_in_graph
 from diffusers.models._modeling_parallel import ContextParallelInput, ContextParallelOutput
 from diffusers.models.attention import AttentionMixin, AttentionModuleMixin, FeedForward
 from diffusers.models.attention_dispatch import dispatch_attention_fn
@@ -31,9 +28,13 @@ from diffusers.models.embeddings import PixArtAlphaTextProjection, TimestepEmbed
 from diffusers.models.modeling_outputs import Transformer2DModelOutput
 from diffusers.models.modeling_utils import ModelMixin
 from diffusers.models.normalization import FP32LayerNorm
+from diffusers.utils import USE_PEFT_BACKEND, deprecate, logging, scale_lora_layers, unscale_lora_layers
+from diffusers.utils.torch_utils import maybe_allow_in_graph
 
+from .action_projectors import EmbodimentSpecificActionDecoder, EmbodimentSpecificActionEncoder
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
+
 
 def _get_qkv_projections(attn: "WanAttention", hidden_states: torch.Tensor, encoder_hidden_states: torch.Tensor):
     # encoder_hidden_states is only passed for cross-attention
@@ -70,9 +71,7 @@ class WanAttnProcessor:
 
     def __init__(self):
         if not hasattr(F, "scaled_dot_product_attention"):
-            raise ImportError(
-                "WanAttnProcessor requires PyTorch 2.0. To use it, please upgrade PyTorch to version 2.0 or higher."
-            )
+            raise ImportError("WanAttnProcessor requires PyTorch 2.0. To use it, please upgrade PyTorch to version 2.0 or higher.")
 
     def __call__(
         self,
@@ -162,8 +161,7 @@ class WanAttnProcessor:
 class WanAttnProcessor2_0:
     def __new__(cls, *args, **kwargs):
         deprecation_message = (
-            "The WanAttnProcessor2_0 class is deprecated and will be removed in a future version. "
-            "Please use WanAttnProcessor instead. "
+            "The WanAttnProcessor2_0 class is deprecated and will be removed in a future version. " "Please use WanAttnProcessor instead. "
         )
         deprecate("WanAttnProcessor2_0", "1.0.0", deprecation_message, standard_warn=False)
         return WanAttnProcessor(*args, **kwargs)
@@ -225,18 +223,14 @@ class WanAttention(torch.nn.Module, AttentionModuleMixin):
             out_features, in_features = concatenated_weights.shape
             with torch.device("meta"):
                 self.to_qkv = nn.Linear(in_features, out_features, bias=True)
-            self.to_qkv.load_state_dict(
-                {"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True
-            )
+            self.to_qkv.load_state_dict({"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True)
         else:
             concatenated_weights = torch.cat([self.to_k.weight.data, self.to_v.weight.data])
             concatenated_bias = torch.cat([self.to_k.bias.data, self.to_v.bias.data])
             out_features, in_features = concatenated_weights.shape
             with torch.device("meta"):
                 self.to_kv = nn.Linear(in_features, out_features, bias=True)
-            self.to_kv.load_state_dict(
-                {"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True
-            )
+            self.to_kv.load_state_dict({"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True)
 
         if self.added_kv_proj_dim is not None:
             concatenated_weights = torch.cat([self.add_k_proj.weight.data, self.add_v_proj.weight.data])
@@ -244,9 +238,7 @@ class WanAttention(torch.nn.Module, AttentionModuleMixin):
             out_features, in_features = concatenated_weights.shape
             with torch.device("meta"):
                 self.to_added_kv = nn.Linear(in_features, out_features, bias=True)
-            self.to_added_kv.load_state_dict(
-                {"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True
-            )
+            self.to_added_kv.load_state_dict({"weight": concatenated_weights, "bias": concatenated_bias}, strict=True, assign=True)
 
         self.fused_projections = True
 
@@ -494,9 +486,9 @@ class WanTransformerBlock(nn.Module):
     ) -> torch.Tensor:
         if temb.ndim == 4:
             # temb: batch_size, seq_len, 6, inner_dim (wan2.2 ti2v)
-            shift_msa, scale_msa, gate_msa, c_shift_msa, c_scale_msa, c_gate_msa = (
-                self.scale_shift_table.unsqueeze(0) + temb.float()
-            ).chunk(6, dim=2)
+            shift_msa, scale_msa, gate_msa, c_shift_msa, c_scale_msa, c_gate_msa = (self.scale_shift_table.unsqueeze(0) + temb.float()).chunk(
+                6, dim=2
+            )
             # batch_size, seq_len, 1, inner_dim
             shift_msa = shift_msa.squeeze(2)
             scale_msa = scale_msa.squeeze(2)
@@ -506,9 +498,7 @@ class WanTransformerBlock(nn.Module):
             c_gate_msa = c_gate_msa.squeeze(2)
         else:
             # temb: batch_size, 6, inner_dim (wan2.1/wan2.2 14B)
-            shift_msa, scale_msa, gate_msa, c_shift_msa, c_scale_msa, c_gate_msa = (
-                self.scale_shift_table + temb.float()
-            ).chunk(6, dim=1)
+            shift_msa, scale_msa, gate_msa, c_shift_msa, c_scale_msa, c_gate_msa = (self.scale_shift_table + temb.float()).chunk(6, dim=1)
 
         # 1. Self-attention
         norm_hidden_states = (self.norm1(hidden_states.float()) * (1 + scale_msa) + shift_msa).type_as(hidden_states)
@@ -521,18 +511,14 @@ class WanTransformerBlock(nn.Module):
         hidden_states = hidden_states + attn_output
 
         # 3. Feed-forward
-        norm_hidden_states = (self.norm3(hidden_states.float()) * (1 + c_scale_msa) + c_shift_msa).type_as(
-            hidden_states
-        )
+        norm_hidden_states = (self.norm3(hidden_states.float()) * (1 + c_scale_msa) + c_shift_msa).type_as(hidden_states)
         ff_output = self.ffn(norm_hidden_states)
         hidden_states = (hidden_states.float() + ff_output.float() * c_gate_msa).type_as(hidden_states)
 
         return hidden_states
 
 
-class WanTransformer3DModel(
-    ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalModelMixin, CacheMixin, AttentionMixin
-):
+class WanTransformer3DModel(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalModelMixin, CacheMixin, AttentionMixin):
     r"""
     A Transformer model for video-like data used in the Wan model.
 
@@ -635,9 +621,7 @@ class WanTransformer3DModel(
         # 3. Transformer blocks
         self.blocks = nn.ModuleList(
             [
-                WanTransformerBlock(
-                    inner_dim, ffn_dim, num_attention_heads, qk_norm, cross_attn_norm, eps, added_kv_proj_dim
-                )
+                WanTransformerBlock(inner_dim, ffn_dim, num_attention_heads, qk_norm, cross_attn_norm, eps, added_kv_proj_dim)
                 for _ in range(num_layers)
             ]
         )
@@ -667,6 +651,35 @@ class WanTransformer3DModel(
             nn.Linear(128, 14),
         )
 
+    def set_action_projectors(
+        self,
+        action_dim: int,
+        num_embodiments: int = 1,
+        projector_dtype: torch.dtype = torch.float32,
+    ):
+        inner_dim = self.config.num_attention_heads * self.config.attention_head_dim
+        self.action_encoder = EmbodimentSpecificActionEncoder(
+            action_dim=action_dim,
+            inner_dim=inner_dim,
+            num_embodiments=num_embodiments,
+            dtype=projector_dtype,
+        )
+        self.action_decoder = EmbodimentSpecificActionDecoder(
+            inner_dim=inner_dim,
+            action_dim=action_dim,
+            num_embodiments=num_embodiments,
+            dtype=projector_dtype,
+        )
+
+    def _encode_action_tokens(self, action: torch.Tensor, emb_ids: Optional[torch.Tensor] = None) -> torch.Tensor:
+        if getattr(self.action_encoder, "uses_emb_ids", False):
+            return self.action_encoder(action, emb_ids=emb_ids)
+        return self.action_encoder(action)
+
+    def _decode_action_tokens(self, action_states: torch.Tensor, emb_ids: Optional[torch.Tensor] = None) -> torch.Tensor:
+        if getattr(self.action_decoder, "uses_emb_ids", False):
+            return self.action_decoder(action_states, emb_ids=emb_ids)
+        return self.action_decoder(action_states)
 
     def forward(
         self,
@@ -679,6 +692,7 @@ class WanTransformer3DModel(
         state: Optional[Dict[str, Any]] = None,
         action: Optional[torch.Tensor] = None,
         extra_timestep: Optional[torch.Tensor] = None,
+        emb_ids: Optional[torch.Tensor] = None,
     ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
         if attention_kwargs is not None:
             attention_kwargs = attention_kwargs.copy()
@@ -691,9 +705,7 @@ class WanTransformer3DModel(
             scale_lora_layers(self, lora_scale)
         else:
             if attention_kwargs is not None and attention_kwargs.get("scale", None) is not None:
-                logger.warning(
-                    "Passing `scale` via `attention_kwargs` when not using the PEFT backend is ineffective."
-                )
+                logger.warning("Passing `scale` via `attention_kwargs` when not using the PEFT backend is ineffective.")
 
         batch_size, num_channels, num_frames, height, width = hidden_states.shape
         p_t, p_h, p_w = self.config.patch_size
@@ -701,15 +713,15 @@ class WanTransformer3DModel(
         post_patch_height = height // p_h
         post_patch_width = width // p_w
 
-        action_states = self.action_encoder(action) # (1, 4)
-        state_states = self.action_encoder(state)
-        num_action_tokens = action_states.shape[1] # [B, 48, D]
-        num_state_tokens = state_states.shape[1] # [B, 1, D]
+        action_states = self._encode_action_tokens(action, emb_ids=emb_ids)  # (1, 4)
+        state_states = self._encode_action_tokens(state, emb_ids=emb_ids)
+        num_action_tokens = action_states.shape[1]  # [B, 48, D]
+        num_state_tokens = state_states.shape[1]  # [B, 1, D]
         timestep = torch.cat([timestep, extra_timestep], dim=1)
         extra_states = torch.cat([action_states, state_states], dim=1)  # [B, 49, D]
 
-        rotary_emb = self.rope(hidden_states) # (B, 288, 1, D)
-        extra_rotary_emb = self.action_rope(extra_states) # (B, 49, 1, D)
+        rotary_emb = self.rope(hidden_states)  # (B, 288, 1, D)
+        extra_rotary_emb = self.action_rope(extra_states)  # (B, 49, 1, D)
 
         hidden_states = self.patch_embedding(hidden_states)
         hidden_states = hidden_states.flatten(2).transpose(1, 2)
@@ -741,9 +753,7 @@ class WanTransformer3DModel(
         # 4. Transformer blocks
         if torch.is_grad_enabled() and self.gradient_checkpointing:
             for block in self.blocks:
-                hidden_states = self._gradient_checkpointing_func(
-                    block, hidden_states, encoder_hidden_states, timestep_proj, rotary_emb
-                )
+                hidden_states = self._gradient_checkpointing_func(block, hidden_states, encoder_hidden_states, timestep_proj, rotary_emb)
         else:
             for block in self.blocks:
                 hidden_states = block(hidden_states, encoder_hidden_states, timestep_proj, rotary_emb)
@@ -768,13 +778,11 @@ class WanTransformer3DModel(
         hidden_states = (self.norm_out(hidden_states.float()) * (1 + scale) + shift).type_as(hidden_states)
         action_states = hidden_states[:, -num_action_tokens:]
         hidden_states = hidden_states[:, :num_hidden_tokens]
-        action_pred = self.action_decoder(action_states)
+        action_pred = self._decode_action_tokens(action_states, emb_ids=emb_ids)
 
         hidden_states = self.proj_out(hidden_states)
 
-        hidden_states = hidden_states.reshape(
-            batch_size, post_patch_num_frames, post_patch_height, post_patch_width, p_t, p_h, p_w, -1
-        )
+        hidden_states = hidden_states.reshape(batch_size, post_patch_num_frames, post_patch_height, post_patch_width, p_t, p_h, p_w, -1)
         hidden_states = hidden_states.permute(0, 7, 1, 4, 2, 5, 3, 6)
         output = hidden_states.flatten(6, 7).flatten(4, 5).flatten(2, 3)
 

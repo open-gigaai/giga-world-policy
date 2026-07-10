@@ -2,13 +2,9 @@ import functools
 
 import torch
 
-from .wa_casual_trainer import CasualWATrainer
-from .wa_trainer_pretrain import _as_dim_mask, _as_time_mask, masked_mse
-
+from world_action_model.trainer.wa_casual_trainer import CasualWATrainer
 
 class CasualWATrainerPretrain(CasualWATrainer):
-    # For cross-embodiment training where action dimensions can be inconsistent across robots,
-    # this trainer supports masking action dimensions (e.g. via `action_dim_mask`) when computing loss.
     def forward_step(self, batch_dict):
         transformer = functools.partial(self.model, "transformer")
         images = batch_dict["images"]
@@ -17,6 +13,7 @@ class CasualWATrainerPretrain(CasualWATrainer):
         timestep, sigma = self.get_timestep_and_sigma(images.shape[0], images.ndim)
         action = batch_dict["action"]
         state = batch_dict["state"]
+        emb_ids = batch_dict["embodiment_id"]
 
         if self.state_repeats > 1:
             state = state.repeat(1, self.state_repeats, 1)
@@ -82,7 +79,7 @@ class CasualWATrainerPretrain(CasualWATrainer):
         num_latent_tokens = frame_per_tokens * first_frame_mask.shape[2]
         timestep = torch.zeros(bs, num_state_tokens + num_action_tokens + num_latent_tokens, device=noisy_latents.device, dtype=noisy_latents.dtype)
         num_clean_latent_tokens = frame_per_tokens
-        timestep[:, num_state_tokens + num_clean_latent_tokens:] = noise_t
+        timestep[:, num_state_tokens + num_clean_latent_tokens :] = noise_t
 
         visual_pred, action_pred = transformer(
             ref_latents=ref_latents,
@@ -92,17 +89,56 @@ class CasualWATrainerPretrain(CasualWATrainer):
             return_dict=False,
             action=noisy_action,
             state=state,
+            emb_ids=emb_ids,
         )
 
         visual_loss = ((visual_pred.float() - visual_target.float()) * first_frame_mask).pow(2).mean()
 
         dim_mask = None
         if "action_dim_mask" in batch_dict:
-            dim_mask = _as_dim_mask(batch_dict["action_dim_mask"], batch_size=bs, seq_len=action.shape[1], dim=action.shape[2], device=action_pred.device)
+            dim_mask = _as_dim_mask(
+                batch_dict["action_dim_mask"], batch_size=bs, seq_len=action.shape[1], dim=action.shape[2], device=action_pred.device
+            )
 
-        action_loss = masked_mse(action_pred.float(), action_target.float(), dim_mask=dim_mask, time_mask=None)
+        time_mask = None
+        if "action_loss_mask" in batch_dict:
+            time_mask = _as_time_mask(batch_dict["action_loss_mask"], batch_size=bs, seq_len=action.shape[1], device=action_pred.device)
+
+        action_loss = masked_mse(action_pred.float(), action_target.float(), dim_mask=dim_mask, time_mask=time_mask)
 
         return {
             "visual_loss": visual_loss,
             "action_loss": action_loss,
         }
+
+def _as_dim_mask(mask: torch.Tensor, batch_size: int, seq_len: int, dim: int, device: torch.device) -> torch.Tensor:
+    if mask.dim() == 1:
+        mask = mask[None, None, :]
+    elif mask.dim() == 2:
+        mask = mask[:, None, :]
+    elif mask.dim() != 3:
+        raise ValueError(f"action_dim_mask must have 1/2/3 dims, got {mask.shape=}")
+    if mask.shape[0] != batch_size or mask.shape[-1] != dim:
+        raise ValueError(f"action_dim_mask has incompatible shape {mask.shape}, expected (*,{dim}) with batch {batch_size}")
+    if mask.shape[1] not in (1, seq_len):
+        raise ValueError(f"action_dim_mask has incompatible seq_len {mask.shape[1]}, expected 1 or {seq_len}")
+    return mask.to(device=device)
+
+def masked_mse(pred: torch.Tensor, target: torch.Tensor, dim_mask: torch.Tensor | None, time_mask: torch.Tensor | None) -> torch.Tensor:
+    sq = (pred - target).pow(2)
+
+    if dim_mask is None:
+        per_token = sq.mean(dim=-1)
+    else:
+        dim_mask = dim_mask.to(dtype=sq.dtype, device=sq.device)
+        sq = sq * dim_mask
+        denom = dim_mask.sum(dim=-1).clamp_min(1.0)
+        per_token = sq.sum(dim=-1) / denom
+
+    if time_mask is None:
+        return per_token.mean()
+
+    time_mask = time_mask.to(dtype=per_token.dtype, device=per_token.device)
+    weighted = per_token * time_mask
+    denom = time_mask.sum().clamp_min(1.0)
+    return weighted.sum() / denom

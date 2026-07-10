@@ -530,6 +530,10 @@ class Trainer:
             batch_sampler=batch_sampler,
             collate_fn=collator,
             num_workers=data_config.num_workers,
+            pin_memory=data_config.get('pin_memory', False),
+            # persistent_workers=True,
+            # prefetch_factor=4,
+            # in_order=False,
         )
         if self.distributed_type == DistributedType.DEEPSPEED:
             # Configure DeepSpeed micro batch size per GPU

@@ -46,8 +46,7 @@ pip3 install -e .
 
 ## 🚀 Getting Started
 
-- We provide a step-by-step [example](./examples/wan/README.md) to teach you how to fine-tune a model using GigaTrain.
-- Refer to [projects](https://github.com/open-gigaai/giga-models/tree/main/projects) for more examples.
+We provide a step-by-step [example](./examples/wan/README.md) to teach you how to fine-tune a model using GigaTrain.
 
 ## 🤝 Contributing
 

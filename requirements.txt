@@ -1,0 +1,38 @@
+# Project-level runtime pins verified with Python 3.11.
+# Install torch/torchvision/torchaudio from the cu126 PyTorch index before this file;
+# see README.md for the exact command.
+
+accelerate==1.13.0
+av==15.0.0
+beautifulsoup4==4.12.3
+decord==0.6.0
+deepspeed==0.17.4
+diffusers==0.36.0
+einops==0.8.0
+ftfy==6.3.1
+huggingface-hub==0.34.3
+imageio==2.37.0
+lerobot==0.4.4
+lmdb==1.6.2
+lpips==0.1.4
+matplotlib==3.11.0
+numpy==2.4.6
+nvidia-ml-py==12.570.86
+opencv-python==4.11.0.86
+pandas==2.2.3
+paramiko==3.5.0
+peft==0.17.1
+pillow==11.3.0
+pyarrow==21.0.0
+pytorch-fid==0.3.0
+pyzmq==27.0.0
+regex==2024.11.6
+safetensors==0.5.2
+scikit-image==0.25.1
+terminaltables==3.1.10
+tokenizers==0.21.4
+torchao==0.14.1
+transformers==4.54.1
+tyro==0.9.13
+wandb==0.24.2
+xformers==0.0.31.post1

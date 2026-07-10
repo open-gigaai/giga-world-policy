@@ -8,15 +8,19 @@ from .datasets import (
     Dataset,
     FileDataset,
     FileWriter,
-    LeRobotDataset,
     LmdbDataset,
     LmdbWriter,
     PklDataset,
     PklWriter,
+    WeightedConcatDataset,
     load_config,
     load_dataset,
     register_dataset,
 )
+from .utils import is_lerobot_available
+
+if is_lerobot_available():
+    from .datasets import LeRobotDataset, LeRobotVQADataset
 from .evaluators import (
     AestheticScoreEvaluator,
     CLIPScoreEvaluator,
@@ -26,7 +30,7 @@ from .evaluators import (
     PSNREvaluator,
     SSIMEvaluator,
 )
-from .samplers import AspectRatioSampler, BucketBatchSampler, BucketSampler, DefaultSampler, SpecialDatasetSampler
+from .samplers import AspectRatioSampler, BucketBatchSampler, BucketSampler, DefaultSampler, ListWeightedSampler, SpecialDatasetSampler, WeightedSampler
 from .structures import (
     BaseStructure,
     Boxes,
