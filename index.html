@@ -1,497 +1,1300 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="description" content="GigaWorld-Policy: An Efficient Action-Centered World–Action Model">
-  <meta name="keywords" content="GigaAI, Robotics, Embodied AI, World Model, Policy">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GigaWorld-Policy</title>
-
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg">
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Models." name="description"/>
+<meta content="#ffffff" name="theme-color"/>
+<link href="https://open-gigaai.github.io/giga-world-policy/" rel="canonical"/>
+<title>GigaWorld-Policy-0.5</title>
+<style>
     :root {
-      --bg0: #f6f8ff;
-      --bg1: #ffffff;
-      --panel: rgba(255, 255, 255, 0.75);
-      --panel-strong: rgba(255, 255, 255, 0.92);
-      --border: rgba(16, 24, 40, 0.12);
-      --text: rgba(16, 24, 40, 0.92);
-      --muted: rgba(16, 24, 40, 0.68);
-      --accent0: #4f46e5;
-      --accent1: #06b6d4;
-      --accent2: #10b981;
-      --shadow: 0 12px 34px rgba(16, 24, 40, 0.14);
-      --shadow-soft: 0 10px 24px rgba(16, 24, 40, 0.10);
-      --radius: 14px;
+      --paper: #ffffff;
+      --soft: #f5f7fb;
+      --ink: #111827;
+      --text: #29364a;
+      --line: #e5eaf2;
+      --max: 1180px;
+      --shadow: 0 24px 70px rgba(17, 31, 52, 0.12);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     }
 
+    * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-
     body {
-      font-family: "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
       color: var(--text);
-      background: radial-gradient(1200px 720px at 18% -10%, rgba(79, 70, 229, 0.14), rgba(246, 248, 255, 0) 66%),
-                  radial-gradient(980px 620px at 90% 0%, rgba(6, 182, 212, 0.12), rgba(246, 248, 255, 0) 62%),
-                  radial-gradient(780px 520px at 55% 22%, rgba(16, 185, 129, 0.08), rgba(246, 248, 255, 0) 65%),
-                  linear-gradient(180deg, var(--bg1), var(--bg0));
-      min-height: 100vh;
+      background: var(--soft);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    ::selection { background: rgba(57, 213, 238, 0.28); }
 
-    body::before {
-      content: "";
+    .topbar {
       position: fixed;
-      inset: 0;
+      left: 0;
+      top: 14px;
+      z-index: 100;
+      width: 100%;
+      background: transparent;
       pointer-events: none;
-      background-image:
-        linear-gradient(to right, rgba(16, 24, 40, 0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(16, 24, 40, 0.06) 1px, transparent 1px);
-      background-size: 56px 56px;
-      opacity: 0.10;
-      transform: translateZ(0);
     }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(520px 240px at 20% 10%, rgba(16, 185, 129, 0.10), transparent 62%),
-                  radial-gradient(700px 300px at 82% 0%, rgba(79, 70, 229, 0.10), transparent 64%);
-      opacity: 0.85;
-      transform: translateZ(0);
+    .topbar-inner {
+      width: min(calc(100% - 64px), 1160px);
+      margin: 0 auto;
+      min-height: 46px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border: 1px solid rgba(71, 85, 105, 0.14);
+      border-radius: 999px;
+      background: rgba(207, 213, 222, 0.54);
+      box-shadow: 0 14px 38px rgba(17, 24, 39, 0.09);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      pointer-events: auto;
     }
-
-    .section { position: relative; }
-
-    .section::before {
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      color: #111827;
+      font-weight: 820;
+      font-size: 18px;
+      letter-spacing: -0.035em;
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      font-weight: 650;
+    }
+    .nav-links a {
+      position: relative;
+      color: rgba(17, 24, 39, 0.66);
+      padding: 12px 0 11px;
+      transition: 160ms ease;
+    }
+    .nav-links a::after {
       content: "";
       position: absolute;
       left: 0;
       right: 0;
-      top: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.35), rgba(79, 70, 229, 0.25), transparent);
-      opacity: 0.6;
+      bottom: 4px;
+      height: 2px;
+      transform: scaleX(0);
+      transform-origin: center;
+      border-radius: 999px;
+      background: #111827;
+      box-shadow: 0 0 10px rgba(17, 24, 39, 0.18);
+      transition: transform 160ms ease;
     }
+    .nav-links a:hover,
+    .nav-links a.active { color: #111827; }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { transform: scaleX(1); }
 
-    .section .container { position: relative; z-index: 1; }
-
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      border-bottom: 1px solid var(--border);
-      background: var(--panel);
-      backdrop-filter: blur(10px);
-    }
-
-    .navbar .navbar-item { color: var(--muted); font-weight: 600; }
-    .navbar .navbar-item:hover { color: var(--text); background: rgba(16, 24, 40, 0.04); }
-    .navbar .navbar-item:focus { color: var(--text); background: rgba(16, 24, 40, 0.04); }
-    .navbar .navbar-burger span { background: rgba(16, 24, 40, 0.72); }
-    .navbar-menu.is-active { background: rgba(255, 255, 255, 0.9); }
-
-    .tech-hero {
+    .hero {
       position: relative;
+      min-height: 100vh;
       overflow: hidden;
-      background: linear-gradient(135deg, #0b1220 0%, #0b2a4a 48%, #0b1220 100%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: #111827;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(57, 213, 238, 0.055), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(95, 134, 255, 0.050), transparent 30%),
+        radial-gradient(circle at 72% 78%, rgba(17, 24, 39, 0.035), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #fbfdff 48%, #ffffff 100%);
+      box-shadow: inset 0 1px 0 rgba(17,24,39,0.04);
     }
-
-    .tech-hero::before {
+    .hero::before {
+      content: "";
+      z-index: 0;
+      position: absolute;
+      inset: 58px 0 0;
+      background:
+        radial-gradient(circle at 20% 28%, rgba(17, 24, 39, 0.045) 0 1px, transparent 1.4px),
+        radial-gradient(circle at 82% 32%, rgba(57, 213, 238, 0.070) 0 1px, transparent 1.4px),
+        radial-gradient(circle at 65% 70%, rgba(95, 134, 255, 0.055) 0 1px, transparent 1.4px);
+      background-size: 86px 86px, 112px 112px, 132px 132px;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: "";
+      z-index: 4;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 8px;
+      background: linear-gradient(to bottom, transparent 0%, rgba(245, 247, 251, 0.45) 84%, var(--soft) 100%);
+      pointer-events: none;
+    }
+.hero-stars {
+      position: absolute;
+      inset: 44px 0 10px;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-stars span {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--s);
+      height: var(--s);
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.22);
+      opacity: calc(var(--o) * 0.34);
+      box-shadow: none;
+      animation: starTwinkle var(--d) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    .hero-stars span:nth-child(4n) {
+      background: rgba(57, 213, 238, 0.22);
+    }
+    .hero-stars span:nth-child(7n)::after {
       content: "";
       position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(1200px 540px at 50% 0%, rgba(79, 70, 229, 0.22), transparent 62%),
-                  radial-gradient(980px 520px at 65% 10%, rgba(6, 182, 212, 0.16), transparent 62%);
-      opacity: 1;
+      left: 50%;
+      top: 50%;
+      width: calc(var(--s) * 5.2);
+      height: 1px;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(90deg, transparent, rgba(17,24,39,0.16), transparent);
+      opacity: 0.32;
+    }
+    .hero-stars span:nth-child(11n)::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1px;
+      height: calc(var(--s) * 5.2);
+      transform: translate(-50%, -50%);
+      background: linear-gradient(180deg, transparent, rgba(17,24,39,0.12), transparent);
+      opacity: 0.26;
+    }
+    .hero-stars .shooting {
+      width: 78px;
+      height: 1px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(17,24,39,0.18), rgba(17,24,39,0.0));
+      opacity: 0;
+      box-shadow: none;
+      transform: rotate(-18deg);
+      animation: shootingStar 12s linear infinite;
+    }
+    .hero-stars .shooting:nth-last-child(1) { left: 72%; top: 23%; animation-delay: 1.2s; }
+    .hero-stars .shooting:nth-last-child(2) { left: 18%; top: 31%; animation-delay: 5.4s; width: 64px; }
+    .hero-stars .shooting:nth-last-child(3) { left: 63%; top: 67%; animation-delay: 7.1s; width: 54px; }
+    @keyframes starTwinkle {
+      0%, 100% { opacity: calc(var(--o) * 0.48); transform: scale(0.82); }
+      42% { opacity: min(1, calc(var(--o) * 1.35)); transform: scale(1.18); }
+      68% { opacity: calc(var(--o) * 0.70); transform: scale(0.98); }
+    }
+    @keyframes shootingStar {
+      0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-18deg); }
+      4% { opacity: 0.65; }
+      14% { opacity: 0; transform: translate3d(-150px, 52px, 0) rotate(-18deg); }
+      100% { opacity: 0; transform: translate3d(-150px, 52px, 0) rotate(-18deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-stars span,
+      .hero-stars .shooting,
+      .hero-title-main,
+      .version-highlight { animation: none; }
     }
 
-    .tech-hero .hero-body { position: relative; z-index: 1; }
 
-    .publication-title {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(6, 182, 212, 0.95), rgba(79, 70, 229, 0.95));
+    .hero-robot-outline {
+      position: absolute;
+      left: clamp(-110px, -4vw, -46px);
+      bottom: -10px;
+      z-index: 0;
+      width: clamp(180px, 21.5vw, 312px);
+      max-height: 58vh;
+      object-fit: contain;
+      opacity: 0.22;
+      filter:
+        brightness(0)
+        drop-shadow(0 18px 34px rgba(17, 24, 39, 0.10));
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      width: min(calc(100% - 36px), 1160px);
+      min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 86px 0 42px;
+      transform: translateY(-24px);
+    }
+    .hero-inner::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 51%;
+      width: min(820px, 82vw);
+      height: 320px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center, rgba(116, 157, 225, 0.055), transparent 68%),
+        radial-gradient(ellipse at center, rgba(47, 92, 176, 0.045), transparent 64%);
+      filter: blur(6px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .hero-logo-combo {
+      position: absolute;
+      left: clamp(18px, 1vw, 48px);
+      top: clamp(112px, 12vh, 146px);
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0;
+      opacity: 0.95;
+      filter: drop-shadow(0 10px 22px rgba(17,24,39,0.08));
+    }
+    .hero-logo-combo img {
+      display: block;
+      filter: brightness(0);
+    }
+    .hero-logo-symbol { height: clamp(20px, 2.45vw, 31px); width: auto; }
+    .hero-logo-wordmark { height: clamp(13px, 1.55vw, 21px); width: auto; }
+    h1 {
+      margin: 0;
+      max-width: 1280px;
+      line-height: 1.08;
+      letter-spacing: -0.042em;
+      font-weight: 850;
+      text-wrap: balance;
+      text-shadow: none;
+    }
+    .hero-title-main {
+      display: block;
+      font-size: clamp(31px, 4.0vw, 52px);
+      background: linear-gradient(100deg,
+        #111827 0%,
+        #111827 36%,
+        #26364f 48%,
+        #111827 62%,
+        #1f2937 100%);
+      background-size: 240% auto;
+      color: transparent;
       -webkit-background-clip: text;
       background-clip: text;
+      animation: heroTitleGlow 12s ease-in-out infinite;
+    }
+    @keyframes heroTitleGlow {
+      0%, 100% { background-position: 12% 50%; }
+      50% { background-position: 92% 50%; }
+    }
+
+    .version-highlight {
+      position: relative;
+      display: inline-block;
+      padding: 0 0.035em;
+      background: linear-gradient(105deg, #111827 0%, #111827 28%, #d92535 48%, #26364f 62%, #111827 100%);
+      background-size: 220% auto;
       color: transparent;
-      letter-spacing: -0.02em;
-      font-family: "Castoro", serif;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: versionPulse 6.4s ease-in-out infinite;
     }
-
-    .tech-hero .subtitle {
-      color: rgba(255, 255, 255, 0.82) !important;
-      max-width: 980px;
-      margin-left: auto;
-      margin-right: auto;
+    @keyframes versionPulse {
+      0%, 100% { background-position: 18% 50%; filter: drop-shadow(0 0 0 rgba(217,37,53,0)); }
+      50% { background-position: 92% 50%; filter: drop-shadow(0 0 4px rgba(217,37,53,0.12)); }
     }
-
-    .publication-authors a { color: rgba(255, 255, 255, 0.9); }
-    .publication-authors a:hover { color: #fff; }
-
-    .publication-links {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+    .hero-title-sub {
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(30px, 3vw, 37px);
+      letter-spacing: -0.050em;
+      white-space: nowrap;
     }
-
-    .publication-links .button.is-dark {
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.92), rgba(6, 182, 212, 0.86));
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+    .subtitle {
+      max-width: 760px;
+      margin: 34px auto 0;
+      color: rgba(17, 24, 39, 0.72);
+      font-size: clamp(15px, 1.35vw, 18px);
+      line-height: 1.55;
+      font-weight: 450;
     }
-
-    .publication-links .button.is-dark:hover {
-      filter: brightness(1.05);
-    }
-
-    .publication-links .button .icon img { height: 1em; width: auto; }
-    body.lang-en .lang-zh { display: none !important; }
-    body.lang-zh .lang-en { display: none !important; }
-
-    .lang-toggle .button.lang-btn {
-      border: 1px solid rgba(16, 24, 40, 0.12);
-      background: rgba(255, 255, 255, 0.75);
-      color: rgba(16, 24, 40, 0.78);
+    .affiliation {
+      margin-top: 20px;
+      color: rgba(17, 24, 39, 0.78);
+      font-size: 15px;
       font-weight: 800;
-      box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08);
+      letter-spacing: -0.02em;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 38px;
+      transform: translateY(50px);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      min-width: 122px;
+      padding: 0 20px;
+      border-radius: 9px;
+      border: 1px solid rgba(17,24,39,0.12);
+      background: rgba(255,255,255,0.72);
+      color: #111827;
+      font-size: 15px;
+      font-weight: 820;
+      box-shadow: 0 14px 36px rgba(17,24,39,0.10);
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+    .pill:hover { transform: translateY(-2px); background: rgba(255,255,255,0.96); border-color: rgba(17,24,39,0.22); }
+    .pill.primary {
+      border-color: rgba(224, 45, 45, 0.42);
+      background: linear-gradient(135deg, #e42735 0%, #e63b2f 58%, #c92233 100%);
+      color: #ffffff;
+      box-shadow: 0 16px 38px rgba(224, 45, 45, 0.20);
+    }
+    .pill .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      font-size: 21px;
+      line-height: 1;
+    }
+    .pill .arxiv-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.92);
+      color: #c91f31;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .github-icon { width: 22px; height: 22px; fill: currentColor; }
+    .video-icon { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+    .side-indicator {
+      position: fixed;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .side-indicator a {
+      position: relative;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(17,24,39,0.28);
+      background: rgba(255,255,255,0.64);
+      box-shadow: 0 0 0 3px rgba(17,24,39,0.04);
+      transition: 160ms ease;
+    }
+    .side-indicator a::before {
+      content: attr(data-label);
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%) translateX(4px);
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.86);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 760;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: 160ms ease;
+      backdrop-filter: blur(10px);
+    }
+    .side-indicator a:hover::before { opacity: 1; transform: translateY(-50%) translateX(0); }
+    .side-indicator a.active {
+      background: #111827;
+      border-color: #111827;
+      box-shadow: 0 0 0 5px rgba(17,24,39,0.10), 0 0 16px rgba(17,24,39,0.20);
+      transform: scale(1.18);
     }
 
-    .lang-toggle .button.lang-btn.is-active {
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(6, 182, 212, 0.10)), rgba(255, 255, 255, 0.85);
-      border-color: rgba(79, 70, 229, 0.22);
-      color: rgba(16, 24, 40, 0.92);
+    main { position: relative; z-index: 2; background: var(--soft); }
+    section { scroll-margin-top: 82px; }
+    .section { padding: 88px 0; background: var(--paper); }
+    .section.alt { background: var(--soft); }
+    .section-inner {
+      width: min(calc(100% - 36px), var(--max));
+      margin: 0 auto;
+    }
+    .figure-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .figure-pad { padding: 24px; }
+    .figure-img {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid #eef2f7;
+      background: #fff;
+    }
+    .caption {
+      margin: 16px auto 0;
+      max-width: 1080px;
+      color: #667085;
+      font-size: 15px;
+      line-height: 1.62;
+      text-align: center;
+    }
+    .abstract-only {
+      max-width: 980px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: clamp(28px, 4vw, 48px);
+      color: #172033;
+      font-size: 18px;
+      line-height: 1.82;
+    }
+    .abstract-only .placeholder-text {
+      color: #1f2937;
+      font-style: normal;
+      font-weight: 470;
+    }
+    .abstract-only strong {
+      color: #000000;
+      font-weight: 760;
+    }
+.page-title {
+      margin-bottom: 34px;
+    }
+    .page-title h2,
+.page-title h2 {
+      font-size: clamp(28px, 3.5vw, 42px);
+    }
+    .section-head h2 {
+      font-size: clamp(28px, 3.5vw, 42px);
+    }
+h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+    }
+    h3 {
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1.18;
+      letter-spacing: -0.028em;
+    }
+    p { margin: 0; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14px; }
+    thead th {
+      color: #172033;
+      background: #f0f5fa;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    th, td { padding: 14px 16px; border-bottom: 1px solid #edf1f6; text-align: left; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+.citation-box {
+      overflow: auto;
+      border-radius: 22px;
+      border: 1px solid #cfe4f8;
+      background: #eef7ff;
+      color: #1f3148;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+    pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+    footer {
+      padding: 40px 0;
+      background: #0f1a2a;
+      color: rgba(245,250,255,0.72);
+      font-size: 14px;
+    }
+    .footer-inner {
+      width: min(calc(100% - 36px), var(--max));
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
+    .footer-links a { color: rgba(245,250,255,0.86); }
+
+    @media (max-width: 1120px) { .hero-title-sub { white-space: normal; } }
+    @media (max-width: 900px) {
+      .topbar { top: 10px; }
+      .topbar-inner { width: min(calc(100% - 28px), 1440px); min-height: auto; padding: 12px 18px; align-items: flex-start; flex-direction: column; border-radius: 22px; }
+      .nav-links { justify-content: flex-start; gap: 14px; font-size: 13px; }
+      .nav-links a { padding: 4px 0; }
+      .nav-links a::after { bottom: -2px; }
+      .hero-inner { padding-top: 170px; transform: translateY(-12px); }
+      .section { padding: 66px 0; }
+.side-indicator { right: 12px; gap: 9px; }
+      .side-indicator a { width: 10px; height: 10px; }
+      .hero-title-main { font-size: clamp(30px, 10vw, 46px); }
+      .hero-title-sub { font-size: clamp(21px, 6.2vw, 32px); white-space: normal; }
+      .hero-logo-combo { left: 22px; top: 158px; gap: 8px; margin: 0; }
+      .hero-robot-outline { width: clamp(145px, 30vw, 215px); opacity: 0.14; left: -72px; bottom: -8px; }
+}
+  
+
+    /* Restructured project pages */
+    .promo-section {
+      min-height: 100vh;
+      padding: 92px 28px 38px;
+      display: grid;
+      place-items: center;
+      background: #f7f9fc;
+    }
+    .promo-video-wrap {
+      width: min(980px, calc(100vw - 72px));
+      border: 1px solid rgba(17, 24, 39, 0.10);
+      border-radius: 28px;
+      overflow: hidden;
+      background: #eef2f7;
+      box-shadow: 0 28px 75px rgba(17, 31, 52, 0.13);
+    }
+    .promo-video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      background: #eef2f7;
+    }
+    .video-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 9px;
+      padding: 10px 14px 12px;
+      border-top: 1px solid rgba(17, 24, 39, 0.08);
+      background: rgba(255, 255, 255, 0.92);
+      color: #4b5563;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .video-speed-select {
+      min-width: 82px;
+      height: 34px;
+      padding: 0 30px 0 11px;
+      border: 1px solid #d5dce6;
+      border-radius: 9px;
+      background: #ffffff;
+      color: #111827;
+      font: inherit;
+      cursor: pointer;
+    }
+    .video-speed-select:focus-visible {
+      outline: 2px solid rgba(95, 134, 255, 0.28);
+      outline-offset: 2px;
+    }
+    .promo-video,
+    .demo-video-inline {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
+    }
+/* Balanced content widths from the project-video page onward. */
+    #architecture .section-inner { width: min(calc(100% - 72px), 1040px); }
+    #abstract .section-inner { width: min(calc(100% - 72px), 980px); }
+    #features .section-inner { width: min(calc(100% - 72px), 1080px); }
+    #experiments .section-inner { width: min(calc(100% - 72px), 1100px); }
+    #citation .section-inner { width: min(calc(100% - 72px), 980px); }
+    .content-section { padding-top: 96px; padding-bottom: 104px; }
+    .content-section .page-title { margin-bottom: 42px; }
+    .content-section .page-title h2 { max-width: 980px; line-height: 1.04; }
+    .paper-block {
+      border: 1px solid #e5eaf2;
+      border-radius: 28px;
+      padding: clamp(24px, 3vw, 38px);
+      background: rgba(255,255,255,0.94);
+      box-shadow: 0 20px 55px rgba(17,31,52,0.075);
+    }
+    .paper-block + .paper-block { margin-top: 28px; }
+    .subsection-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+    .subsection-title-row.simple { align-items: flex-start; }
+    .subsection-title-row > div:first-child { display: flex; align-items: center; gap: 12px; }
+    .subsection-title-row h3 {
+      margin: 0;
+      font-size: clamp(22px, 2.35vw, 31px);
+      letter-spacing: -0.038em;
+    }
+    .section-index {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      border-radius: 11px;
+      background: #111827;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+    }
+    .latency-spotlight {
+      min-width: 230px;
+      padding: 14px 18px;
+      border: 1px solid rgba(13,148,103,0.20);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.13), rgba(57,213,238,0.07));
+      text-align: right;
+    }
+    .latency-spotlight span,
+    .latency-spotlight small { display: block; color: #326153; }
+    .latency-spotlight span { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .latency-spotlight strong { display: block; color: #087a58; font-size: 30px; line-height: 1.05; letter-spacing: -0.05em; }
+    .latency-spotlight small { font-size: 12px; }
+    .table-card {
+      overflow-x: auto;
+      border: 1px solid #e5eaf2;
+      border-radius: 20px;
+      background: #fff;
+    }
+    .research-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      font-size: 14.5px;
+    }
+    .research-table th,
+    .research-table td {
+      padding: 13px 15px;
+      border-bottom: 1px solid #edf1f6;
+      text-align: center;
+      white-space: normal;
+      vertical-align: middle;
+    }
+    .research-table th:first-child,
+    .research-table td:first-child { text-align: left; }
+    .research-table thead th {
+      background: #f3f6fa;
+      color: #172033;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.035em;
+      text-transform: none;
+    }
+    .research-table tbody tr:last-child td { border-bottom: 0; }
+    .research-table tbody tr:hover { background: #fafcff; }
+    .research-table .best-cell,
+    .research-table td.gain { color: #087a58; font-weight: 850; background: rgba(16,185,129,0.075); }
+    .ours-row td { background: rgba(57,213,238,0.095); font-weight: 750; }
+    .average-row td { background: #f1f5f9; font-weight: 850; }
+    .paper-caption,
+    .paper-figure figcaption {
+      margin: 12px 4px 0;
+      color: #5b6678;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .table-caption {
+      margin: 0 4px 10px;
+      color: #4f5b6d;
+      font-weight: 560;
+    }
+    .feature-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+      gap: 30px;
+      align-items: center;
+    }
+    .compact-table-card {
+      overflow: hidden;
     }
 
-    .content { color: var(--muted); font-size: 1.05rem; }
-    .content p { line-height: 1.75; margin: 0 0 1rem; }
-    .content p:last-child { margin-bottom: 0; }
-    .content li { line-height: 1.7; margin: 0.35rem 0; }
-    .content ul, .content ol { margin-top: 0.75rem; margin-bottom: 1rem; padding-left: 1.25rem; }
-    .content h2.title { letter-spacing: -0.01em; margin-bottom: 0.75rem; }
-    .content h2.title + p { margin-top: 0.4rem; }
-    .content strong { color: var(--text); }
-    .content a { color: rgba(6, 182, 212, 0.95); font-weight: 600; }
-    .content a:hover { color: rgba(16, 185, 129, 0.95); }
-
-    .figure {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px;
-      background: var(--panel-strong);
-      box-shadow: var(--shadow-soft);
+    .compact-table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+      font-size: 13px;
     }
 
-    .figure video { width: 100%; border-radius: 10px; display: block; }
-    .teaser video { width: 100%; border-radius: 12px; }
-  </style>
+    .compact-table th,
+    .compact-table td {
+      padding: 8px 14px;
+    }
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-      burgers.forEach((el) => {
-        el.addEventListener('click', () => {
-          const target = el.dataset.target;
-          const $target = document.getElementById(target);
-          el.classList.toggle('is-active');
-          $target.classList.toggle('is-active');
-        });
-      });
+    .compact-table th:first-child,
+    .compact-table td:first-child {
+      width: 54%;
+      padding-right: 22px;
+    }
 
-      const langButtons = Array.prototype.slice.call(document.querySelectorAll('.lang-btn'), 0);
-      const setLang = (lang) => {
-        document.body.classList.remove('lang-en', 'lang-zh');
-        document.body.classList.add(`lang-${lang}`);
-        langButtons.forEach((b) => {
-          const isActive = b.dataset.lang === lang;
-          b.classList.toggle('is-active', isActive);
-          b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        });
-      };
-      langButtons.forEach((btn) => btn.addEventListener('click', () => setLang(btn.dataset.lang)));
-      setLang(document.body.classList.contains('lang-zh') ? 'zh' : 'en');
-    });
-  </script>
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']]
-      },
-      options: {
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    .compact-table th:nth-child(2),
+    .compact-table td:nth-child(2),
+    .compact-table th:nth-child(3),
+    .compact-table td:nth-child(3) {
+      width: 23%;
+      padding-left: 16px;
+      padding-right: 16px;
+      white-space: nowrap;
+      border-left: 1px solid #edf1f6;
+    }
+
+    .compact-figure {
+      align-self: center;
+    }
+    .paper-figure {
+      margin: 0;
+      border: 1px solid #e5eaf2;
+      border-radius: 20px;
+      padding: 16px;
+      background: #fff;
+    }
+    .paper-figure img { width: 100%; height: auto; border-radius: 12px; }
+    .compact-figure img { min-height: 285px; object-fit: contain; }
+    .full-figure { max-width: 1160px; margin: 0 auto; }
+    .full-figure img { max-height: 465px; object-fit: contain; }
+    .architecture-upload { border: 0; border-radius: 10px; }
+    .simulation-summary-card { max-width: 760px; margin: 0 auto; }
+    .simulation-summary { min-width: 560px; }
+    .realworld-tables { display: grid; gap: 24px; }
+    .result-table-group { min-width: 0; }
+    .detailed-table { min-width: 1040px; font-size: 13.5px; }
+    .detailed-table th,
+    .detailed-table td { padding: 11px 10px; }
+    .detailed-table th:first-child,
+    .detailed-table td:first-child { width: 38%; }
+    .long-horizon-layout { margin-top: 24px; }
+    .compact-long-table .research-table { min-width: 900px; }
+    .demos-inline {
+      margin-top: 30px;
+      padding-top: 0;
+      padding-bottom: 30px;
+      margin-bottom: 30px;
+      border-top: 0;
+      border-bottom: 1px solid #e5eaf2;
+    }
+    .demos-inline h3 { margin-bottom: 18px; font-size: 25px; }
+    .demo-grid-inline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .demo-card-inline {
+      overflow: hidden;
+      border: 1px solid #dfe5ee;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 12px 28px rgba(17,31,52,0.08);
+    }
+    .demo-video-inline {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 0;
+      background: #eef2f7;
+      object-fit: cover;
+      box-shadow: none;
+    }
+    .demo-meta {
+      padding: 14px 15px 16px;
+      border-top: 1px solid #edf1f6;
+    }
+    .demo-meta h4 {
+      margin: 0 0 6px;
+      color: #172033;
+      font-size: 16px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+.demo-card-inline .video-control-row {
+      padding: 9px 12px;
+      background: #f8fafc;
+    }
+    #citation { min-height: 72vh; display: flex; align-items: center; }
+
+    @media (max-width: 980px) {
+      .feature-split { grid-template-columns: 1fr; }
+      .latency-spotlight { min-width: 200px; }
+      .demo-grid-inline { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .promo-section { padding: 150px 16px 34px; min-height: 86vh; }
+      .promo-video-wrap { width: 100%; border-radius: 20px; }
+      #architecture .section-inner,
+      #abstract .section-inner,
+      #features .section-inner,
+      #experiments .section-inner,
+      #citation .section-inner { width: min(calc(100% - 28px), 100%); }
+      .content-section { padding-top: 76px; padding-bottom: 76px; }
+      .paper-block { border-radius: 22px; padding: 20px 14px; }
+      .subsection-title-row { align-items: flex-start; flex-direction: column; }
+      .latency-spotlight { width: 100%; text-align: left; }
+      .subsection-title-row > div:first-child { align-items: flex-start; }
+      .research-table { font-size: 13px; }
+      .compact-table { font-size: 12px; }
+      .compact-table th,
+      .compact-table td { padding: 8px 8px; }
+      .compact-table th:first-child,
+      .compact-table td:first-child { width: 50%; padding-right: 10px; }
+      .compact-table th:nth-child(2),
+      .compact-table td:nth-child(2),
+      .compact-table th:nth-child(3),
+      .compact-table td:nth-child(3) {
+        width: 25%;
+        padding-left: 8px;
+        padding-right: 8px;
       }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    }
+
+  </style>
 </head>
-<body class="lang-en">
-
-<nav class="navbar is-spaced" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="#">
-      <strong>GigaAI</strong>
-    </a>
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
-
-  <div id="navbarMenu" class="navbar-menu">
-    <div class="navbar-start">
-      <a class="navbar-item" href="#abstract"><span class="lang-en">Abstract</span><span class="lang-zh">概要</span></a>
-      <a class="navbar-item" href="#architecture"><span class="lang-en">Architecture</span><span class="lang-zh">架构</span></a>
-      <a class="navbar-item" href="#training"><span class="lang-en">Training</span><span class="lang-zh">训练</span></a>
-      <a class="navbar-item" href="#results"><span class="lang-en">Results</span><span class="lang-zh">结果</span></a>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <div class="buttons has-addons lang-toggle">
-          <button class="button is-small lang-btn is-active" type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button class="button is-small lang-btn" type="button" data-lang="zh" aria-pressed="false">中文</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<body>
+<nav aria-label="Primary navigation" class="topbar">
+<div class="topbar-inner">
+<a aria-label="GigaWorld-Policy-0.5 home" class="brand" href="#top">GigaWorld-Policy-0.5</a>
+<div class="nav-links">
+<a href="#project-video">Video</a>
+<a href="#architecture">Architecture</a>
+<a href="#abstract">Abstract</a>
+<a href="#features">Features</a>
+<a href="#experiments">Experiments</a>
+<a href="#citation">Citation</a>
+</div>
+</div>
 </nav>
-
-<section class="hero tech-hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">
-            <span class="lang-en">GigaWorld-Policy: An Efficient Action-Centered World–Action Model</span>
-            <span class="lang-zh">GigaWorld-Policy，性能最强的实时「世界-动作模型 WA」</span>
-          </h1>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><a href="https://github.com/open-gigaai" target="_blank" rel="noopener noreferrer">GigaAI</a></span>
-          </div>
-
-          <div class="publication-links" style="margin-top: 0.75rem;">
-            <span class="link-block">
-              <a href="TODO" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                <span class="lang-en">Paper</span><span class="lang-zh">论文</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://huggingface.co/open-gigaai" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon">
-                  <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face">
-                </span>
-                <span class="lang-en">Models</span><span class="lang-zh">模型</span>
-              </a>
-            </span>
-            <span class="link-block lang-en">
-              <a href="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fab fa-youtube"></i></span>
-                <span>Video</span>
-              </a>
-            </span>
-            <span class="link-block lang-zh">
-              <a href="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fab fa-youtube"></i></span>
-                <span>视频</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://github.com/GigaAI-research/GigaWorld-Policy" target="_blank" rel="noopener noreferrer" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fab fa-github"></i></span>
-                <span class="lang-en">Code</span><span class="lang-zh">代码</span>
-              </a>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<nav aria-label="Section indicator" class="side-indicator">
+<a data-label="Home" data-section="top" href="#top" title="Home"></a>
+<a data-label="Video" data-section="project-video" href="#project-video" title="Video"></a>
+<a data-label="Architecture" data-section="architecture" href="#architecture" title="Architecture"></a>
+<a data-label="Abstract" data-section="abstract" href="#abstract" title="Abstract"></a>
+<a data-label="Features" data-section="features" href="#features" title="Features"></a>
+<a data-label="Experiments" data-section="experiments" href="#experiments" title="Experiments"></a>
+<a data-label="Citation" data-section="citation" href="#citation" title="Citation"></a>
+</nav>
+<header class="hero" data-section="top" id="top">
+<div aria-hidden="true" class="hero-stars">
+<span style="--x:20.68%;--y:62.56%;--s:2.4px;--o:0.48;--d:8.56s;--delay:-2.97s"></span>
+<span style="--x:20.83%;--y:31.82%;--s:2.1px;--o:0.46;--d:8.30s;--delay:-7.06s"></span>
+<span style="--x:52.03%;--y:71.05%;--s:1.6px;--o:0.81;--d:8.52s;--delay:-6.12s"></span>
+<span style="--x:25.84%;--y:68.73%;--s:1.8px;--o:0.78;--d:8.26s;--delay:-1.95s"></span>
+<span style="--x:49.42%;--y:67.17%;--s:2.1px;--o:0.36;--d:8.68s;--delay:-6.24s"></span>
+<span style="--x:70.89%;--y:52.18%;--s:2.1px;--o:0.79;--d:6.80s;--delay:-5.57s"></span>
+<span style="--x:14.56%;--y:47.10%;--s:1.6px;--o:0.62;--d:7.77s;--delay:-1.65s"></span>
+<span style="--x:21.47%;--y:61.37%;--s:2.8px;--o:0.43;--d:6.37s;--delay:-3.41s"></span>
+<span style="--x:87.93%;--y:23.90%;--s:2.1px;--o:0.64;--d:5.50s;--delay:-1.51s"></span>
+<span style="--x:79.80%;--y:52.77%;--s:1.4px;--o:0.62;--d:6.19s;--delay:-4.08s"></span>
+<span style="--x:26.96%;--y:14.78%;--s:2.4px;--o:0.47;--d:8.35s;--delay:-2.96s"></span>
+<span style="--x:76.88%;--y:75.72%;--s:1.2px;--o:0.87;--d:4.46s;--delay:-2.49s"></span>
+<span style="--x:85.35%;--y:47.18%;--s:2.8px;--o:0.45;--d:5.88s;--delay:-5.83s"></span>
+<span style="--x:40.52%;--y:65.96%;--s:1.6px;--o:0.53;--d:7.45s;--delay:-3.11s"></span>
+<span style="--x:87.95%;--y:43.45%;--s:1.2px;--o:0.83;--d:5.92s;--delay:-1.85s"></span>
+<span style="--x:60.62%;--y:74.82%;--s:2.8px;--o:0.36;--d:6.58s;--delay:-1.38s"></span>
+<span style="--x:54.46%;--y:7.73%;--s:2.1px;--o:0.58;--d:5.82s;--delay:-3.12s"></span>
+<span style="--x:47.42%;--y:41.89%;--s:1.6px;--o:0.48;--d:8.07s;--delay:-6.59s"></span>
+<span style="--x:37.90%;--y:59.78%;--s:3.1px;--o:0.39;--d:7.94s;--delay:-0.56s"></span>
+<span style="--x:73.79%;--y:68.82%;--s:1.6px;--o:0.84;--d:5.11s;--delay:-7.39s"></span>
+<span style="--x:81.23%;--y:65.69%;--s:1.8px;--o:0.43;--d:5.30s;--delay:-3.30s"></span>
+<span style="--x:9.94%;--y:34.59%;--s:2.1px;--o:0.85;--d:7.40s;--delay:-4.83s"></span>
+<span style="--x:41.53%;--y:50.08%;--s:1.2px;--o:0.50;--d:5.97s;--delay:-2.03s"></span>
+<span style="--x:55.98%;--y:40.79%;--s:1.4px;--o:0.47;--d:4.61s;--delay:-6.91s"></span>
+<span style="--x:66.18%;--y:43.78%;--s:1.4px;--o:0.75;--d:5.44s;--delay:-2.52s"></span>
+<span style="--x:75.62%;--y:53.84%;--s:3.1px;--o:0.64;--d:4.24s;--delay:-2.33s"></span>
+<span style="--x:84.46%;--y:81.50%;--s:2.4px;--o:0.44;--d:8.68s;--delay:-7.25s"></span>
+<span style="--x:37.46%;--y:52.27%;--s:3.1px;--o:0.64;--d:8.34s;--delay:-1.80s"></span>
+<span style="--x:83.03%;--y:63.84%;--s:3.1px;--o:0.75;--d:6.34s;--delay:-0.62s"></span>
+<span style="--x:80.71%;--y:62.17%;--s:1.8px;--o:0.37;--d:5.79s;--delay:-1.99s"></span>
+<span style="--x:69.64%;--y:55.50%;--s:2.1px;--o:0.47;--d:6.49s;--delay:-2.30s"></span>
+<span style="--x:32.89%;--y:86.36%;--s:1.8px;--o:0.73;--d:6.03s;--delay:-7.86s"></span>
+<span style="--x:43.04%;--y:84.68%;--s:1.6px;--o:0.50;--d:4.48s;--delay:-4.00s"></span>
+<span style="--x:26.30%;--y:30.09%;--s:1.2px;--o:0.63;--d:7.33s;--delay:-5.20s"></span>
+<span style="--x:9.14%;--y:45.16%;--s:2.1px;--o:0.73;--d:6.89s;--delay:-6.48s"></span>
+<span style="--x:62.57%;--y:50.69%;--s:1.8px;--o:0.37;--d:8.64s;--delay:-5.62s"></span>
+<span style="--x:81.19%;--y:22.83%;--s:1.4px;--o:0.79;--d:8.14s;--delay:-7.77s"></span>
+<span style="--x:54.13%;--y:27.93%;--s:1.4px;--o:0.74;--d:7.96s;--delay:-4.16s"></span>
+<span style="--x:21.36%;--y:44.34%;--s:2.1px;--o:0.59;--d:4.46s;--delay:-4.97s"></span>
+<span style="--x:61.90%;--y:68.77%;--s:2.1px;--o:0.83;--d:5.66s;--delay:-7.72s"></span>
+<span style="--x:64.37%;--y:12.31%;--s:1.6px;--o:0.56;--d:4.25s;--delay:-0.34s"></span>
+<span style="--x:27.78%;--y:88.21%;--s:3.1px;--o:0.40;--d:4.16s;--delay:-5.12s"></span>
+<span style="--x:35.33%;--y:8.19%;--s:2.4px;--o:0.46;--d:8.45s;--delay:-6.32s"></span>
+<span style="--x:25.73%;--y:22.33%;--s:1.6px;--o:0.54;--d:6.95s;--delay:-7.83s"></span>
+<span style="--x:7.24%;--y:54.09%;--s:2.4px;--o:0.85;--d:4.08s;--delay:-2.64s"></span>
+<span style="--x:70.88%;--y:35.46%;--s:2.4px;--o:0.76;--d:5.41s;--delay:-3.85s"></span>
+<span style="--x:57.60%;--y:79.25%;--s:2.1px;--o:0.86;--d:4.97s;--delay:-4.22s"></span>
+<span style="--x:42.44%;--y:37.65%;--s:1.4px;--o:0.50;--d:4.56s;--delay:-0.62s"></span>
+<span style="--x:23.05%;--y:37.31%;--s:3.1px;--o:0.51;--d:4.75s;--delay:-6.83s"></span>
+<span style="--x:32.25%;--y:39.24%;--s:2.4px;--o:0.75;--d:8.41s;--delay:-4.07s"></span>
+<span aria-hidden="true" class="shooting"></span>
+<span aria-hidden="true" class="shooting"></span>
+<span aria-hidden="true" class="shooting"></span>
+</div>
+<img alt="" aria-hidden="true" class="hero-robot-outline" src="assets/img/robot-outline-white.png"/>
+<div class="hero-inner">
+<div aria-label="GigaAI" class="hero-logo-combo">
+<img alt="" aria-hidden="true" class="hero-logo-symbol" src="assets/img/gigaai-symbol.min.svg"/>
+<img alt="GigaAI" class="hero-logo-wordmark" src="assets/img/gigaai-wordmark.min.svg"/>
+</div>
+<h1><span class="hero-title-main">GigaWorld-Policy-<span class="version-highlight">0.5</span>:</span><span class="hero-title-sub">An Enhanced Framework for Action-Centered World Action Models</span></h1>
+<p class="subtitle">An enhanced action-centered WAM designed for more efficient robot control.</p>
+<div class="affiliation">GigaAI</div>
+<div aria-label="Project links" class="hero-actions">
+<a class="pill primary" href="#" title="arXiv(PDF)"><span class="arxiv-badge">arXiv</span><span>Paper (PDF)</span></a>
+<a class="pill" href="https://github.com/open-gigaai/giga-world-policy" title="GitHub(repo)"><span aria-hidden="true" class="icon"><svg class="github-icon" role="img" viewbox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.01c-3.2.7-3.87-1.38-3.87-1.38-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.11-.75.41-1.26.74-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .98-.31 3.18 1.18A11.1 11.1 0 0 1 12 6.16c.98 0 1.96.13 2.88.39 2.2-1.49 3.17-1.18 3.17-1.18.64 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.42-2.69 5.39-5.26 5.67.42.36.79 1.07.79 2.16v3.03c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path></svg></span><span>Code</span></a>
+<a class="pill" href="#" title="HugingFace(model)"><span aria-hidden="true" class="icon">🤗</span><span>Model</span></a>
+<a class="pill" href="#" title="TODO: replace with dataset link"><span aria-hidden="true" class="icon">🤗</span><span>Dataset</span></a>
+<a class="pill" href="#project-video" title="View the project video"><span aria-hidden="true" class="icon"><svg class="video-icon" role="img" viewbox="0 0 24 24"><rect height="14" rx="3.2" width="17" x="3.5" y="5"></rect><path d="M10 9.2v5.6l5-2.8-5-2.8Z" fill="currentColor" stroke="none"></path></svg></span><span>Video</span></a>
+</div>
+</div>
+</header>
+<main>
+<section aria-label="Project video" class="section promo-section" data-section="project-video" id="project-video">
+<div class="promo-video-wrap">
+<video class="promo-video" controls="" data-first-frame="" muted="" playsinline="" preload="auto">
+<source src="assets/videos/promo.mp4#t=0.001" type="video/mp4"/>
+</video>
+<div class="video-control-row">
+<label for="promo-speed">speed</label>
+<select aria-label="Project video playback speed" class="video-speed-select" data-video-speed="" id="promo-speed">
+<option selected="" value="1">1×</option>
+<option value="1.25">1.25×</option>
+<option value="1.5">1.5×</option>
+<option value="2">2×</option>
+</select>
+</div>
+</div>
 </section>
-
-<section id="teaser" class="hero teaser">
-  <div class="container is-max-desktop">
-    <div class="hero-body">
-      <figure class="image">
-        <video
-          class="lang-en"
-          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-en.mp4"
-          controls
-          autoplay
-          muted
-          loop
-          playsinline
-        >
-          Your browser does not support the video tag.
-        </video>
-        <video
-          class="lang-zh"
-          src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-video-cn.mp4"
-          controls
-          autoplay
-          muted
-          loop
-          playsinline
-        >
-          Your browser does not support the video tag.
-        </video>
-      </figure>
-    </div>
-  </div>
+<section class="section alt" data-section="architecture" id="architecture">
+<div class="section-inner">
+<div class="page-title"><h2>Architecture</h2></div>
+<div class="figure-card">
+<div class="figure-pad">
+<picture><source srcset="assets/img/architecture-framework-hd.svg" type="image/svg+xml"/><img alt="Overview architecture of GigaWorld-Policy-0.5" class="figure-img architecture-upload" src="assets/img/architecture-framework-hd.png"/></picture>
+<p class="caption"><strong>Figure: </strong> Overview of GigaWorld-Policy-0.5, an MoT-based action-centered World Action Model. The model consists of a visual expert and an action expert: the visual expert specializes in processing video tokens, while the action expert focuses on action-token modeling. The two experts are connected through multi-modal self-attention, which follows the same causal masking strategy as GigaWorld-Policy to preserve action-centered dependency modeling. </p>
+</div>
+</div>
+</div>
 </section>
-
-<section class="section" id="abstract">
-  <div class="container is-max-desktop content">
-    <h2 class="title is-3"><span class="lang-en">Abstract</span><span class="lang-zh">概要</span></h2>
-    <p class="lang-zh">
-      基于预训练视频生成骨干初始化的世界-动作模型（World–Action Models）在机器人策略学习中展现出巨大潜力。然而，现有方法存在两项关键瓶颈，限制了性能与实际部署：其一，需要同时对未来视觉动态与对应动作进行推理，带来显著的推理开销；其二，联合建模会耦合视觉与运动表征，使动作预测精度高度依赖未来视频预测质量。为此，我们提出 GigaWorld-Policy：一种以动作为中心的世界-动作模型，学习二维像素–动作动态，并支持仅动作解码以实现高效推理。我们的方法包含三项关键设计：（1）构建多层级的大规模机器人数据集，用于预训练动作条件的视频生成模型，并将其适配为机器人策略学习的骨干；（2）将策略训练拆解为两部分：模型基于当前观测预测未来动作序列，同时基于预测动作与当前观测生成未来视频；训练阶段联合使用动作预测与视频生成监督，提供更丰富的学习信号，并通过视觉动态约束鼓励更合理的动作；（3）推理阶段不再显式预测未来视频，仅保留动作预测过程。真实机器人平台实验表明，相较基线方法，GigaWorld-Policy 推理速度提升 $10\times$，单次推理仅需 $0.36$ 秒，同时任务成功率提升 $35\%$。
-    </p>
-    <p class="lang-en">
-      World–Action Models initialized from pre-trained video generation backbones have demonstrated remarkable potential for robot policy learning. However, existing approaches face two critical bottlenecks that hinder performance and practical deployment. First, simultaneous reasoning over both future visual dynamics and corresponding actions incurs substantial inference overhead. Second, joint modeling entangles visual and motion representations, making motion prediction accuracy heavily dependent on the quality of future video forecasts. Therefore, we introduce GigaWorld-Policy, an action-centered world–action model that learns 2D pixel–action dynamics while enabling action-only decoding for efficient inference. Our method features three key design innovations: (1) A multi-level, large-scale robot dataset is curated to pre-train an action-conditioned video generation model, which is then adapted as the backbone for robot policy learning; (2) We formulate robot policy training into two components: the model predicts future action sequences conditioned on the current observation, and generates future videos based on the predicted actions and the current observation. During training, the model is jointly supervised by action prediction and video generation, providing richer learning signals and encouraging more plausible actions through visual-dynamics constraints; (3) At inference time, we no longer explicitly predict future videos and retain only the action prediction process. Experimental evaluations on real-world robotic platforms demonstrate that GigaWorld-Policy achieves a $10\times$ speedup in inference compared to baseline methods, requiring merely $0.36$ seconds per inference, while simultaneously improving task success rates by $35\%$.
-    </p>
-  </div>
+<section class="section" data-section="abstract" id="abstract">
+<div class="section-inner">
+<div class="page-title"><h2>Abstract</h2></div>
+<div class="abstract-only">
+<p class="placeholder-text"><strong>World Action Models (WAMs)</strong> improve robot policy learning by jointly modeling robot actions and <strong>future visual observations</strong>, allowing future scene evolution to provide dense supervision for physically grounded action generation. However, many WAMs require explicit future-video generation or predictive rollout during inference, leading to high computational cost and limiting real-time closed-loop deployment. <strong>GigaWorld-Policy</strong> addresses this issue with an action-centered formulation, where future visual dynamics are used during training while action-only decoding is used at inference time. Building upon this framework, we present <strong>GigaWorld-Policy-0.5</strong>, an enhanced action-centered WAM designed for more efficient robot control. <strong>GigaWorld-Policy-0.5</strong> introduces a <strong>Mixture-of-Transformers</strong> architecture that separates visual dynamics modeling and action generation into specialized experts, reducing active computation during <strong>action-only inference</strong>. During pretraining, we further combine <strong>action-conditioned world modeling</strong> with WAM training to strengthen the coupling between visual dynamics and robot actions. In addition, we employ an agent-based <strong>AutoResearch</strong> pipeline to systematically search training configurations and derive a reliable training recipe with reduced manual intervention. Experiments and ablations show that <strong>GigaWorld-Policy-0.5</strong> preserves the training benefits of future visual dynamics while improving inference efficiency for robot control.</p>
+</div>
+</div>
 </section>
-
-<section class="section" id="architecture">
-  <div class="container is-max-desktop content">
-    <h2 class="title is-3">
-      <span class="lang-en">01. Efficient World–Action Architecture</span>
-      <span class="lang-zh">01. 高效的世界-动作模型架构：10倍推理速度提升</span>
-    </h2>
-    <p class="lang-zh">
-      在 GigaWorld-Policy 中，我们创新性打造了新一代高效的世界-动作模型架构。不同于传统 WA 架构依赖低效、冗长的视频预测链路，GigaWorld-Policy 以动作为中心的模型范式突破了跨模态耦合瓶颈，从架构层面实现推理效率的跃迁式提升。
-    </p>
-    <p class="lang-en">
-      We build a new generation of efficient World–Action architecture for GigaWorld-Policy. Unlike prior WA models that rely on long and costly video prediction chains, our action-centered formulation breaks the cross-modal coupling bottleneck and delivers a leap in inference efficiency.
-    </p>
-    <p class="lang-zh">
-      GigaWorld-Policy 基于轻量级世界模型 GigaWorld-0.5 构建，通过多视角拼接的紧凑表征进行未来具身操作视频的高效预测，大幅降低推理阶段的显存占用与计算成本，为实际部署提供了工业级的稳定性与可扩展性。
-    </p>
-    <p class="lang-en">
-      GigaWorld-Policy is built on the lightweight world model GigaWorld-0.5. It uses compact multi-view representations to efficiently model future embodied interaction videos, substantially reducing memory footprint and compute cost for practical deployment.
-    </p>
-    <p class="lang-zh">
-      GigaWorld-Policy 在架构层面实现了统一化的多模态表征与协同建模。模型将视觉观测、机器人状态与动作序列共同映射到同一嵌入空间，使不同模态能够在同一 Transformer 主干下被一致地处理。由此，在底层结构上原生建立起跨模态语义对齐与信息融合，避免传统多分支架构中的模态割裂，并为策略学习提供更加稳定、紧耦合的表达基础。
-    </p>
-    <p class="lang-en">
-      The architecture unifies multimodal representations and joint modeling: visual observations, robot states, and action sequences are mapped into a shared embedding space and processed by a single Transformer backbone. This yields native cross-modal alignment and fusion, avoiding modality fragmentation and providing a more stable, tightly coupled basis for policy learning.
-    </p>
-    <p class="lang-zh">
-      首创“训繁推简”混合范式策略模型：训练阶段通过 Causal Mask（因果掩码）机制统一建模动作 Token 与未来视觉 Token，使动作预测受益于未来视觉动态带来的高密度监督信号；推理阶段完全舍弃视频预测分支，仅保留轻量化动作生成模块，避免长序列视觉 Token 推理带来的计算冗余。
-    </p>
-    <p class="lang-en">
-      We propose a “train complex, infer simple” hybrid paradigm: during training, a causal masking mechanism jointly models action tokens and future visual tokens so that action prediction benefits from dense supervision from future dynamics; during inference, we drop the video prediction branch entirely and keep only lightweight action generation, eliminating redundant computation from long visual-token decoding.
-    </p>
-    <p class="lang-zh">
-      与当前主流 WA 模型（如 Motus 及 Cosmos Policy）相比，GigaWorld-Policy 在保持策略质量的同时实现 10 倍推理速度提升，真正匹配机器人高频闭环控制的实时性需求。
-    </p>
-    <p class="lang-en">
-      Compared with mainstream WA models (e.g., Motus and Cosmos Policy), GigaWorld-Policy achieves a $10\times$ inference speedup without sacrificing policy quality, meeting the real-time requirements of high-frequency closed-loop robot control.
-    </p>
-
-    <figure class="image figure" style="margin-top: 1rem;">
-      <video
-        class="lang-en"
-        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-en.mp4"
-        controls
-        autoplay
-        muted
-        loop
-        playsinline
-      >
-        Your browser does not support the video tag.
-      </video>
-      <video
-        class="lang-zh"
-        src="https://github.com/GigaAI-research/GigaWorld-Policy/releases/download/teaser/GigaWorld-Policy-act-cn.mp4"
-        controls
-        autoplay
-        muted
-        loop
-        playsinline
-      >
-        Your browser does not support the video tag.
-      </video>
-    </figure>
-
-    <div style="margin-top: 1rem;">
-      <figure class="image figure">
-        <img src="./assets/image1.png" alt="Figure 1">
-      </figure>
-    </div>
-  </div>
+<section class="section alt content-section" data-section="features" id="features">
+<div class="section-inner">
+<div class="page-title"><h2>Features Compared to GigaWorld-Policy</h2></div>
+<article class="paper-block">
+<div class="subsection-title-row">
+<div>
+<span class="section-index">01</span>
+<h3>Inference Efficiency</h3>
+</div>
+<div aria-label="RTX 4090 latency highlight" class="latency-spotlight">
+<span>Local RTX 4090</span>
+<strong>110 ms</strong>
+<small>edge-side inference latency</small>
+</div>
+</div>
+<p class="paper-caption table-caption"><strong>Table: </strong> Comparison of inference efficiency and downstream performance on RoboTwin.</p><div class="table-card">
+<table aria-label="Inference efficiency comparison" class="research-table">
+<thead>
+<tr><th>Method</th><th>Latency (ms) ↓</th><th>SR on RoboTwin ↑</th><th>SR on RealRobot ↑</th></tr>
+</thead>
+<tbody>
+<tr><td>π0.5</td><td>225</td><td>0.83</td><td>0.76</td></tr>
+<tr><td>Motus</td><td>3231</td><td>0.89</td><td>0.80</td></tr>
+<tr><td>FastWAM</td><td>229</td><td>0.92</td><td>0.78</td></tr>
+<tr><td>GigaWorld-Policy</td><td>360</td><td>0.87</td><td>0.80</td></tr>
+<tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td><strong>189</strong></td><td>–</td><td><strong>0.85</strong></td></tr>
+</tbody>
+</table>
+</div>
+</article>
+<article class="paper-block">
+<div class="subsection-title-row simple">
+<div>
+<span class="section-index">02</span>
+<h3>Action-Conditioned World-Model Training</h3>
+</div>
+</div>
+<div class="feature-split">
+<div>
+<p class="paper-caption table-caption"><strong>Table: </strong> Ablation study of mixed AC-WM training on RoboTwin.</p><div class="table-card compact-table-card">
+<table aria-label="AC-WM ablation on RoboTwin" class="research-table compact-table">
+<thead><tr><th>Task</th><th>w/o AC-WM</th><th>w/ AC-WM</th></tr></thead>
+<tbody>
+<tr><td>blocks_ranking_rgb</td><td>0.46</td><td class="gain">0.90</td></tr>
+<tr><td>blocks_ranking_size</td><td>0.70</td><td class="gain">0.88</td></tr>
+<tr><td>click_alarmclock</td><td>0.96</td><td>0.94</td></tr>
+<tr><td>click_bell</td><td>0.98</td><td>0.98</td></tr>
+<tr><td>dump_bin_bigbin</td><td>0.92</td><td class="gain">0.98</td></tr>
+<tr><td>grab_roller</td><td>0.92</td><td>0.94</td></tr>
+<tr><td>handover_block</td><td>0.48</td><td>0.46</td></tr>
+<tr><td>handover_mic</td><td>0.78</td><td class="gain">0.90</td></tr>
+<tr><td>hanging_mug</td><td>0.42</td><td class="gain">0.54</td></tr>
+<tr><td>lift_pot</td><td>0.70</td><td class="gain">0.92</td></tr>
+<tr class="average-row"><td>Average</td><td>0.73</td><td>0.84</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<figure class="paper-figure compact-figure">
+<img alt="Success rates at different training steps in the AC-WM ablation study" src="assets/img/figure5-acwm-hd.png"/>
+<figcaption><strong>Figure: </strong> Success rates at different training steps in the AC-WM ablation study on RoboTwin.</figcaption>
+</figure>
+</div>
+</article>
+<article class="paper-block">
+<div class="subsection-title-row simple">
+<div>
+<span class="section-index">03</span>
+<h3>AutoResearch-Driven Hyperparameter Study</h3>
+</div>
+</div>
+<figure class="paper-figure full-figure">
+<img alt="AutoResearch hyperparameter search and training progression" src="assets/img/figure6-autoresearch-hd.png"/>
+<figcaption><strong>Figure: </strong> AutoResearch hyperparameter search and training progression on the <em>pick the fruit</em> task. Left: 1K-step pilot sweep over learning-rate and batch-size configurations. Right: extended training progression under the selected configuration, with the best validation action MSE at 30K steps.</figcaption>
+</figure>
+</article>
+</div>
 </section>
-
-<section class="section" id="training">
-  <div class="container is-max-desktop content">
-    <h2 class="title is-3">
-      <span class="lang-en">02. Efficient Use of Video Data</span>
-      <span class="lang-zh">02. 高效利用视频数据：10倍训练速度提升</span>
-    </h2>
-    <p class="lang-zh">
-      GigaWorld-Policy 构建了分层式高效训练 Pipeline，旨在最大化挖掘视频数据在具身动作训练中的价值，让模型以更少数据、更短时间完成具身操作策略学习。该流程包含三个递进阶段：第一、第二阶段利用海量视频数据训练世界模型 GigaWorld-0.5；第三阶段在 GigaWorld-0.5 的基础上加入具身动作数据训练 GigaWorld-Policy。
-    </p>
-    <p class="lang-en">
-      GigaWorld-Policy adopts a hierarchical, efficient training pipeline to maximize the value of video data for embodied action learning, enabling faster learning with less labeled action data. The pipeline has three stages: Stage 1–2 train the world model GigaWorld-0.5 on large-scale video data, and Stage 3 adds embodied action data to train GigaWorld-Policy on top of GigaWorld-0.5.
-    </p>
-    <ol class="lang-zh">
-      <li>通用世界模型预训练：利用海量互联网视频数据，增强 GigaWorld-0.5 对通用物理规律与视觉动态的理解能力；</li>
-      <li>具身场景适配：依托千小时级多源操作视频（涵盖第一人称、真机及仿真数据）进行场景适配预训练，学习具身交互下的时空演变规律；</li>
-      <li>动作策略对齐：在 GigaWorld-0.5 基础上，仅需少量动作标签真机数据完成训练，对齐“观测 - 动作 - 未来视觉”的因果映射。</li>
-    </ol>
-    <ol class="lang-en">
-      <li>General world-model pre-training: leverage massive internet video data to strengthen GigaWorld-0.5’s understanding of generic physics and visual dynamics.</li>
-      <li>Embodied scene adaptation: pre-train on thousand-hour, multi-source manipulation videos (first-person, real-robot, and simulation data) to learn spatiotemporal evolution under embodied interactions.</li>
-      <li>Action-policy alignment: on top of GigaWorld-0.5, train with a small amount of real-robot action-labeled data to align the causal mapping of “observation – action – future visuals”.</li>
-    </ol>
-
-
-    <figure class="image figure" style="margin-top: 1rem;">
-      <img src="./assets/image2.png" alt="Figure 2">
-    </figure>
-  </div>
+<section class="section content-section" data-section="experiments" id="experiments">
+<div class="section-inner">
+<div class="page-title"><h2>Experiments</h2></div>
+<article class="paper-block">
+<div class="subsection-title-row simple">
+<div><span class="section-index">01</span><h3>Simulation Results</h3></div>
+</div>
+<p class="paper-caption table-caption"><strong>Table: </strong> Average success rates on RoboTwin 2.0 over 50+ simulation tasks under clean and randomized settings.</p><div class="table-card simulation-summary-card">
+<table aria-label="RoboTwin simulation average success rates" class="research-table simulation-summary">
+<thead><tr><th>Method</th><th>Clean</th><th>Randomized</th></tr></thead>
+<tbody>
+<tr><td>π0.5</td><td>0.43</td><td>0.44</td></tr>
+<tr><td>X-VLA</td><td>0.73</td><td>0.73</td></tr>
+<tr><td>Motus</td><td><strong>0.89</strong></td><td><strong>0.87</strong></td></tr>
+<tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td>0.87</td><td>0.85</td></tr>
+</tbody>
+</table>
+</div>
+</article>
+<article class="paper-block">
+<div class="subsection-title-row simple">
+<div><span class="section-index">02</span><h3>Real-World Results</h3></div>
+</div><div class="long-horizon-layout">
+<div class="result-table-group compact-long-table">
+<p class="paper-caption table-caption"><strong>Table: </strong> Evaluation of end-to-end success rates on long-horizon tasks.</p><div class="table-card">
+<table aria-label="Long-horizon task success rates" class="research-table">
+<thead><tr><th>Task name</th><th>π0.5</th><th>Motus</th><th>FastWAM</th><th>GigaWorld-Policy</th><th>GigaWorld-Policy-0.5</th></tr></thead>
+<tbody>
+<tr><td>Heating Food</td><td>0.50</td><td>0.60</td><td>0.50</td><td>0.60</td><td class="best-cell">0.80</td></tr>
+<tr><td>Solid Weighing</td><td>0.30</td><td>0.50</td><td>0.40</td><td>0.40</td><td class="best-cell">0.70</td></tr>
+<tr><td>Tableware Arrangement</td><td>0.70</td><td>0.60</td><td>0.50</td><td>0.60</td><td class="best-cell">0.80</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="demos-inline">
+<h3>Demos</h3>
+<div class="demo-grid-inline">
+<article class="demo-card-inline">
+<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-1.mp4#t=0.001" type="video/mp4"/></video>
+<div class="video-control-row"><label for="demo-speed-1">Speed</label><select aria-label="Demo 1 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-1">
+<option selected="" value="1">1×</option>
+<option value="1.25">1.25×</option>
+<option value="1.5">1.5×</option>
+<option value="2">2×</option>
+</select></div>
+<div class="demo-meta"><h4>Heating Food</h4></div>
+</article>
+<article class="demo-card-inline">
+<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-2.mp4#t=0.001" type="video/mp4"/></video>
+<div class="video-control-row"><label for="demo-speed-2">Speed</label><select aria-label="Demo 2 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-2">
+<option selected="" value="1">1×</option>
+<option value="1.25">1.25×</option>
+<option value="1.5">1.5×</option>
+<option value="2">2×</option>
+</select></div>
+<div class="demo-meta"><h4>Solid Weighing</h4></div>
+</article>
+<article class="demo-card-inline">
+<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-3.mp4#t=0.001" type="video/mp4"/></video>
+<div class="video-control-row"><label for="demo-speed-3">Speed</label><select aria-label="Demo 3 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-3">
+<option selected="" value="1">1×</option>
+<option value="1.25">1.25×</option>
+<option value="1.5">1.5×</option>
+<option value="2">2×</option>
+</select></div>
+<div class="demo-meta"><h4>Tableware Arrangement</h4></div>
+</article>
+</div>
+</div><div class="realworld-tables">
+<div class="result-table-group">
+<p class="paper-caption table-caption"><strong>Table: </strong> Evaluation of text-following ability on the fruit-picking task.</p><div class="table-card">
+<table aria-label="Fruit-picking text following results" class="research-table detailed-table">
+<thead>
+<tr><th>Text instruction</th><th>π0.5</th><th>Motus</th><th>FastWAM</th><th>GigaWorld-Policy</th><th>GigaWorld-Policy-0.5</th></tr>
+</thead>
+<tbody>
+<tr><td>Pick the banana and place it into the basket.</td><td>0.88</td><td>0.93</td><td>0.83</td><td>0.90</td><td class="best-cell">0.95</td></tr>
+<tr><td>Pick the apple and place it into the basket.</td><td>0.73</td><td>0.78</td><td>0.75</td><td>0.73</td><td class="best-cell">0.80</td></tr>
+<tr><td>Pick the lemon and place it into the basket.</td><td>0.68</td><td>0.75</td><td>0.73</td><td>0.78</td><td class="best-cell">0.83</td></tr>
+<tr><td>Pick the grape and place it into the basket.</td><td>0.85</td><td>0.83</td><td>0.88</td><td>0.88</td><td class="best-cell">0.93</td></tr>
+<tr><td>Pick the avocado and place it into the basket.</td><td>0.68</td><td>0.70</td><td>0.75</td><td>0.73</td><td class="best-cell">0.78</td></tr>
+<tr><td>Pick the strawberry and place it into the basket.</td><td>0.78</td><td>0.80</td><td>0.73</td><td>0.78</td><td class="best-cell">0.85</td></tr>
+<tr class="average-row"><td>Average</td><td>0.76</td><td>0.80</td><td>0.78</td><td>0.80</td><td>0.85</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="result-table-group">
+<p class="paper-caption table-caption"><strong>Table: </strong> Evaluation of text-following ability on the object-placement task.</p><div class="table-card">
+<table aria-label="Object-placement text following results" class="research-table detailed-table">
+<thead>
+<tr><th>Text instruction</th><th>π0.5</th><th>Motus</th><th>FastWAM</th><th>GigaWorld-Policy</th><th>GigaWorld-Policy-0.5</th></tr>
+</thead>
+<tbody>
+<tr><td>Pick up the bowl and place it on the plate.</td><td>0.87</td><td>0.88</td><td>0.73</td><td>0.80</td><td class="best-cell">0.93</td></tr>
+<tr><td>Pick up the fork and place it on the plate.</td><td>0.78</td><td>0.83</td><td>0.85</td><td>0.80</td><td class="best-cell">0.88</td></tr>
+<tr><td>Pick up the spoon and place it on the plate.</td><td>0.73</td><td>0.83</td><td>0.80</td><td>0.75</td><td class="best-cell">0.85</td></tr>
+<tr><td>Pick up the bowl and place it into the basket.</td><td>0.75</td><td>0.83</td><td>0.80</td><td>0.88</td><td class="best-cell">0.95</td></tr>
+<tr><td>Pick up the fork and place it into the basket.</td><td>0.65</td><td>0.75</td><td>0.68</td><td>0.78</td><td class="best-cell">0.85</td></tr>
+<tr><td>Pick up the spoon and place it into the basket.</td><td>0.80</td><td>0.85</td><td>0.75</td><td>0.83</td><td class="best-cell">0.88</td></tr>
+<tr class="average-row"><td>Average</td><td>0.76</td><td>0.83</td><td>0.77</td><td>0.81</td><td>0.89</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</article>
+</div>
 </section>
-
-<section class="section" id="results">
-  <div class="container is-max-desktop content">
-    <h2 class="title is-3">
-      <span class="lang-en">03. Real-Robot Success Rate</span>
-      <span class="lang-zh">03. 真机任务成功率高：30%成功率提升</span>
-    </h2>
-    <p class="lang-zh">
-      实验结果表明，GigaWorld-Policy 在「成功率 - 推理速度」权衡曲线上取得了最佳平衡，唯一同时实现了高成功率与实时控制频率。如图所示，在涵盖抓取、装配、整理等 4 类典型任务的评测中：
-    </p>
-    <p class="lang-en">
-      Experiments show that GigaWorld-Policy achieves the best trade-off between success rate and inference speed, uniquely combining high task success with real-time control frequency. As shown in the figure, across four representative tasks (grasping, assembly, and rearrangement, etc.):
-    </p>
-    <ul class="lang-zh">
-      <li>成功率显著领先：平均成功率达到 85% 以上，相较 Motus 与 Cosmos Policy 等主流 WA 模型（约 50%-55%）提升超过 30%。</li>
-      <li>突破实时控制阈值：相较 Motus 与 Cosmos Policy 的推理速度实现 10 倍速度跨越，使机器人更有效应对动态环境干扰与执行误差。</li>
-    </ul>
-    <ul class="lang-en">
-      <li>Significant success-rate gains: average success exceeds 85%, improving by over 30% absolute compared with mainstream WA models such as Motus and Cosmos Policy (about 50%–55%).</li>
-      <li>Real-time control throughput: achieves a $10\times$ speedup over Motus and Cosmos Policy, which is crucial for robustness under dynamic disturbances and execution errors.</li>
-    </ul>
-
-    <figure class="image figure" style="margin-top: 1rem;">
-      <img src="./assets/image4.jpeg" alt="Results figure">
-    </figure>
-  </div>
+<section class="section" data-section="citation" id="citation">
+<div class="section-inner">
+<div class="page-title"><h2>Citation</h2></div>
+<div class="citation-box">
+<pre>@article{gigaworld-policy-0.5,
+  title={GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Model},
+  author={GigaAI},
+  journal={arXiv},
+  year={2026}
+}</pre>
+</div>
+</div>
 </section>
-
-<footer class="footer">
-  <div class="content has-text-centered">
-    <p>
-      <strong>GigaWorld-Policy</strong> · <span class="lang-en">Project Page</span><span class="lang-zh">项目主页</span>
-    </p>
-  </div>
+</main>
+<footer>
+<div class="footer-inner">
+<div>© 2026 GigaAI. All rights reserved.</div>
+<div class="footer-links">
+<a href="https://github.com/open-gigaai/giga-world-policy" title="GitHub(repo)">GitHub</a>
+<a href="#" title="TODO: replace with Paper link">Paper</a>
+<a href="https://gigaai.cc" title="Contact(email)">Contact</a>
+</div>
+</div>
 </footer>
+<script>
+    const navLinks = [...document.querySelectorAll('.nav-links a')];
+    const sideLinks = [...document.querySelectorAll('.side-indicator a')];
+    const sections = [...document.querySelectorAll('[data-section]')];
 
+    function setActive(id) {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      sideLinks.forEach(a => a.classList.toggle('active', a.dataset.section === id));
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter(entry => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActive(visible.target.dataset.section);
+    }, { root: null, threshold: [0.28, 0.42, 0.58, 0.72] });
+
+    sections.forEach(section => observer.observe(section));
+    setActive('top');
+
+    document.querySelectorAll('video[data-first-frame]').forEach((video) => {
+      video.addEventListener('loadedmetadata', () => {
+        if (video.currentTime === 0 && Number.isFinite(video.duration) && video.duration > 0.01) {
+          try { video.currentTime = 0.001; } catch (_) {}
+        }
+      }, { once: true });
+    });
+
+
+    document.querySelectorAll('select[data-video-speed]').forEach((select) => {
+      const container = select.closest('.promo-video-wrap, .demo-card-inline');
+      const video = container ? container.querySelector('video') : null;
+      if (!video) return;
+
+      const supportedRates = new Set([1, 1.25, 1.5, 2]);
+      video.preload = 'auto';
+
+      const applyPlaybackRate = () => {
+        const requestedRate = Number.parseFloat(select.value);
+        const rate = supportedRates.has(requestedRate) ? requestedRate : 1;
+
+        video.defaultPlaybackRate = rate;
+        video.playbackRate = rate;
+      };
+
+      select.addEventListener('change', applyPlaybackRate);
+
+      // Some browsers reset playbackRate after loading a local MP4 or
+      // when playback restarts, so re-apply the selected value.
+      video.addEventListener('loadedmetadata', applyPlaybackRate);
+      video.addEventListener('play', applyPlaybackRate);
+
+      applyPlaybackRate();
+    });
+
+
+  </script>
 </body>
 </html>
