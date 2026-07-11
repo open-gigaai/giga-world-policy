@@ -139,78 +139,7 @@
       background: linear-gradient(to bottom, transparent 0%, rgba(245, 247, 251, 0.45) 84%, var(--soft) 100%);
       pointer-events: none;
     }
-.hero-stars {
-      position: absolute;
-      inset: 44px 0 10px;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .hero-stars span {
-      position: absolute;
-      left: var(--x);
-      top: var(--y);
-      width: var(--s);
-      height: var(--s);
-      border-radius: 999px;
-      background: rgba(17, 24, 39, 0.22);
-      opacity: calc(var(--o) * 0.34);
-      box-shadow: none;
-      animation: starTwinkle var(--d) ease-in-out infinite;
-      animation-delay: var(--delay);
-    }
-    .hero-stars span:nth-child(4n) {
-      background: rgba(57, 213, 238, 0.22);
-    }
-    .hero-stars span:nth-child(7n)::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: calc(var(--s) * 5.2);
-      height: 1px;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(90deg, transparent, rgba(17,24,39,0.16), transparent);
-      opacity: 0.32;
-    }
-    .hero-stars span:nth-child(11n)::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 1px;
-      height: calc(var(--s) * 5.2);
-      transform: translate(-50%, -50%);
-      background: linear-gradient(180deg, transparent, rgba(17,24,39,0.12), transparent);
-      opacity: 0.26;
-    }
-    .hero-stars .shooting {
-      width: 78px;
-      height: 1px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, transparent, rgba(17,24,39,0.18), rgba(17,24,39,0.0));
-      opacity: 0;
-      box-shadow: none;
-      transform: rotate(-18deg);
-      animation: shootingStar 12s linear infinite;
-    }
-    .hero-stars .shooting:nth-last-child(1) { left: 72%; top: 23%; animation-delay: 1.2s; }
-    .hero-stars .shooting:nth-last-child(2) { left: 18%; top: 31%; animation-delay: 5.4s; width: 64px; }
-    .hero-stars .shooting:nth-last-child(3) { left: 63%; top: 67%; animation-delay: 7.1s; width: 54px; }
-    @keyframes starTwinkle {
-      0%, 100% { opacity: calc(var(--o) * 0.48); transform: scale(0.82); }
-      42% { opacity: min(1, calc(var(--o) * 1.35)); transform: scale(1.18); }
-      68% { opacity: calc(var(--o) * 0.70); transform: scale(0.98); }
-    }
-    @keyframes shootingStar {
-      0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-18deg); }
-      4% { opacity: 0.65; }
-      14% { opacity: 0; transform: translate3d(-150px, 52px, 0) rotate(-18deg); }
-      100% { opacity: 0; transform: translate3d(-150px, 52px, 0) rotate(-18deg); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-stars span,
-      .hero-stars .shooting,
+@media (prefers-reduced-motion: reduce) {
       .hero-title-main,
       .version-highlight { animation: none; }
     }
@@ -503,16 +432,15 @@
       color: #000000;
       font-weight: 760;
     }
-.page-title {
+    .page-title {
       margin-bottom: 34px;
     }
-    .page-title h2,
-.page-title h2 {
+    .page-title h2 {
       font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 860;
+      letter-spacing: -0.058em;
     }
-    .section-head h2 {
-      font-size: clamp(28px, 3.5vw, 42px);
-    }
+
 h2 {
       margin: 0;
       color: var(--ink);
@@ -528,16 +456,6 @@ h2 {
       letter-spacing: -0.028em;
     }
     p { margin: 0; }
-table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14px; }
-    thead th {
-      color: #172033;
-      background: #f0f5fa;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    th, td { padding: 14px 16px; border-bottom: 1px solid #edf1f6; text-align: left; white-space: nowrap; }
-    tbody tr:last-child td { border-bottom: 0; }
 .citation-box {
       overflow: auto;
       border-radius: 22px;
@@ -574,7 +492,7 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       .nav-links a::after { bottom: -2px; }
       .hero-inner { padding-top: 170px; transform: translateY(-12px); }
       .section { padding: 66px 0; }
-.side-indicator { right: 12px; gap: 9px; }
+      .side-indicator { right: 12px; gap: 9px; }
       .side-indicator a { width: 10px; height: 10px; }
       .hero-title-main { font-size: clamp(30px, 10vw, 46px); }
       .hero-title-sub { font-size: clamp(21px, 6.2vw, 32px); white-space: normal; }
@@ -606,33 +524,161 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       object-fit: contain;
       background: #eef2f7;
     }
-    .video-control-row {
+
+    .video-player {
+      position: relative;
+      overflow: hidden;
+      background: #0b1220;
+    }
+
+    .promo-video-wrap .video-player {
+      border-radius: 27px;
+    }
+
+    .custom-video-controls {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 9px;
-      padding: 10px 14px 12px;
-      border-top: 1px solid rgba(17, 24, 39, 0.08);
-      background: rgba(255, 255, 255, 0.92);
-      color: #4b5563;
-      font-size: 13px;
-      font-weight: 700;
+      gap: 8px;
+      min-height: 46px;
+      padding: 8px 11px;
+      color: #ffffff;
+      background: linear-gradient(
+        to top,
+        rgba(5, 10, 18, 0.92) 0%,
+        rgba(5, 10, 18, 0.72) 64%,
+        rgba(5, 10, 18, 0) 100%
+      );
+      opacity: 0.96;
+      transition: opacity 160ms ease;
     }
-    .video-speed-select {
-      min-width: 82px;
-      height: 34px;
-      padding: 0 30px 0 11px;
-      border: 1px solid #d5dce6;
-      border-radius: 9px;
-      background: #ffffff;
-      color: #111827;
+
+    .video-player:hover .custom-video-controls,
+    .video-player:focus-within .custom-video-controls {
+      opacity: 1;
+    }
+
+    .video-control-button {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #ffffff;
       font: inherit;
+      line-height: 1;
       cursor: pointer;
     }
-    .video-speed-select:focus-visible {
-      outline: 2px solid rgba(95, 134, 255, 0.28);
-      outline-offset: 2px;
+
+    .video-control-button:hover,
+    .video-control-button:focus-visible {
+      background: rgba(255, 255, 255, 0.20);
+      outline: none;
     }
+
+    .volume-icon {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .volume-icon .speaker-shape {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .volume-icon .mute-mark {
+      display: none;
+    }
+
+    .volume-icon.is-muted .sound-wave {
+      display: none;
+    }
+
+    .volume-icon.is-muted .mute-mark {
+      display: block;
+    }
+
+    .video-time {
+      min-width: 76px;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .video-progress {
+      min-width: 0;
+      flex: 1 1 180px;
+      height: 18px;
+      margin: 0;
+      accent-color: #e42735;
+      cursor: pointer;
+    }
+
+    .video-speed-select {
+      width: 54px;
+      height: 28px;
+      flex: 0 0 auto;
+      padding: 0 5px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 7px;
+      background: rgba(12, 18, 28, 0.84);
+      color: #ffffff;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+
+    .video-speed-select:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.58);
+      outline-offset: 1px;
+    }
+
+    .demo-card-inline .custom-video-controls {
+      gap: 5px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .demo-card-inline .video-time {
+      display: none;
+    }
+
+    .demo-card-inline .video-progress {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .demo-card-inline .video-control-button {
+      width: 26px;
+      height: 26px;
+    }
+
+    .demo-card-inline .video-speed-select {
+      width: 50px;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
+    .video-player:fullscreen .video-time {
+      display: inline;
+    }
+
+
     .promo-video,
     .demo-video-inline {
       transform: translateZ(0);
@@ -685,18 +731,45 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       letter-spacing: 0.04em;
     }
     .latency-spotlight {
-      min-width: 230px;
-      padding: 14px 18px;
+      width: max-content;
+      max-width: 100%;
+      min-width: 0;
+      padding: 10px 13px 9px;
       border: 1px solid rgba(13,148,103,0.20);
-      border-radius: 18px;
+      border-radius: 15px;
       background: linear-gradient(135deg, rgba(16,185,129,0.13), rgba(57,213,238,0.07));
-      text-align: right;
+      text-align: left;
+      line-height: 1.15;
     }
+
     .latency-spotlight span,
-    .latency-spotlight small { display: block; color: #326153; }
-    .latency-spotlight span { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
-    .latency-spotlight strong { display: block; color: #087a58; font-size: 30px; line-height: 1.05; letter-spacing: -0.05em; }
-    .latency-spotlight small { font-size: 12px; }
+    .latency-spotlight small {
+      display: block;
+      color: #326153;
+      white-space: nowrap;
+    }
+
+    .latency-spotlight span {
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.055em;
+      text-transform: uppercase;
+    }
+
+    .latency-spotlight strong {
+      display: block;
+      margin: 3px 0 2px;
+      color: #087a58;
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .latency-spotlight small {
+      font-size: 11px;
+      line-height: 1.25;
+    }
     .table-card {
       overflow-x: auto;
       border: 1px solid #e5eaf2;
@@ -852,15 +925,19 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       line-height: 1.25;
       letter-spacing: -0.02em;
     }
-.demo-card-inline .video-control-row {
-      padding: 9px 12px;
-      background: #f8fafc;
+    #experiments {
+      padding-bottom: 64px;
     }
-    #citation { min-height: 72vh; display: flex; align-items: center; }
+
+    #citation {
+      min-height: auto;
+      padding-top: 48px;
+      padding-bottom: 68px;
+    }
 
     @media (max-width: 980px) {
       .feature-split { grid-template-columns: 1fr; }
-      .latency-spotlight { min-width: 200px; }
+      .latency-spotlight { min-width: 0; }
       .demo-grid-inline { grid-template-columns: 1fr; }
     }
     @media (max-width: 720px) {
@@ -874,7 +951,7 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       .content-section { padding-top: 76px; padding-bottom: 76px; }
       .paper-block { border-radius: 22px; padding: 20px 14px; }
       .subsection-title-row { align-items: flex-start; flex-direction: column; }
-      .latency-spotlight { width: 100%; text-align: left; }
+      .latency-spotlight { width: max-content; max-width: 100%; }
       .subsection-title-row > div:first-child { align-items: flex-start; }
       .research-table { font-size: 13px; }
       .compact-table { font-size: 12px; }
@@ -882,6 +959,15 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       .compact-table td { padding: 8px 8px; }
       .compact-table th:first-child,
       .compact-table td:first-child { width: 50%; padding-right: 10px; }
+
+      .custom-video-controls {
+        gap: 5px;
+        min-height: 42px;
+        padding: 7px 8px;
+      }
+      .video-time { display: none; }
+      .video-speed-select { width: 50px; }
+      .video-control-button { width: 27px; height: 27px; }
       .compact-table th:nth-child(2),
       .compact-table td:nth-child(2),
       .compact-table th:nth-child(3),
@@ -918,61 +1004,6 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
 <a data-label="Citation" data-section="citation" href="#citation" title="Citation"></a>
 </nav>
 <header class="hero" data-section="top" id="top">
-<div aria-hidden="true" class="hero-stars">
-<span style="--x:20.68%;--y:62.56%;--s:2.4px;--o:0.48;--d:8.56s;--delay:-2.97s"></span>
-<span style="--x:20.83%;--y:31.82%;--s:2.1px;--o:0.46;--d:8.30s;--delay:-7.06s"></span>
-<span style="--x:52.03%;--y:71.05%;--s:1.6px;--o:0.81;--d:8.52s;--delay:-6.12s"></span>
-<span style="--x:25.84%;--y:68.73%;--s:1.8px;--o:0.78;--d:8.26s;--delay:-1.95s"></span>
-<span style="--x:49.42%;--y:67.17%;--s:2.1px;--o:0.36;--d:8.68s;--delay:-6.24s"></span>
-<span style="--x:70.89%;--y:52.18%;--s:2.1px;--o:0.79;--d:6.80s;--delay:-5.57s"></span>
-<span style="--x:14.56%;--y:47.10%;--s:1.6px;--o:0.62;--d:7.77s;--delay:-1.65s"></span>
-<span style="--x:21.47%;--y:61.37%;--s:2.8px;--o:0.43;--d:6.37s;--delay:-3.41s"></span>
-<span style="--x:87.93%;--y:23.90%;--s:2.1px;--o:0.64;--d:5.50s;--delay:-1.51s"></span>
-<span style="--x:79.80%;--y:52.77%;--s:1.4px;--o:0.62;--d:6.19s;--delay:-4.08s"></span>
-<span style="--x:26.96%;--y:14.78%;--s:2.4px;--o:0.47;--d:8.35s;--delay:-2.96s"></span>
-<span style="--x:76.88%;--y:75.72%;--s:1.2px;--o:0.87;--d:4.46s;--delay:-2.49s"></span>
-<span style="--x:85.35%;--y:47.18%;--s:2.8px;--o:0.45;--d:5.88s;--delay:-5.83s"></span>
-<span style="--x:40.52%;--y:65.96%;--s:1.6px;--o:0.53;--d:7.45s;--delay:-3.11s"></span>
-<span style="--x:87.95%;--y:43.45%;--s:1.2px;--o:0.83;--d:5.92s;--delay:-1.85s"></span>
-<span style="--x:60.62%;--y:74.82%;--s:2.8px;--o:0.36;--d:6.58s;--delay:-1.38s"></span>
-<span style="--x:54.46%;--y:7.73%;--s:2.1px;--o:0.58;--d:5.82s;--delay:-3.12s"></span>
-<span style="--x:47.42%;--y:41.89%;--s:1.6px;--o:0.48;--d:8.07s;--delay:-6.59s"></span>
-<span style="--x:37.90%;--y:59.78%;--s:3.1px;--o:0.39;--d:7.94s;--delay:-0.56s"></span>
-<span style="--x:73.79%;--y:68.82%;--s:1.6px;--o:0.84;--d:5.11s;--delay:-7.39s"></span>
-<span style="--x:81.23%;--y:65.69%;--s:1.8px;--o:0.43;--d:5.30s;--delay:-3.30s"></span>
-<span style="--x:9.94%;--y:34.59%;--s:2.1px;--o:0.85;--d:7.40s;--delay:-4.83s"></span>
-<span style="--x:41.53%;--y:50.08%;--s:1.2px;--o:0.50;--d:5.97s;--delay:-2.03s"></span>
-<span style="--x:55.98%;--y:40.79%;--s:1.4px;--o:0.47;--d:4.61s;--delay:-6.91s"></span>
-<span style="--x:66.18%;--y:43.78%;--s:1.4px;--o:0.75;--d:5.44s;--delay:-2.52s"></span>
-<span style="--x:75.62%;--y:53.84%;--s:3.1px;--o:0.64;--d:4.24s;--delay:-2.33s"></span>
-<span style="--x:84.46%;--y:81.50%;--s:2.4px;--o:0.44;--d:8.68s;--delay:-7.25s"></span>
-<span style="--x:37.46%;--y:52.27%;--s:3.1px;--o:0.64;--d:8.34s;--delay:-1.80s"></span>
-<span style="--x:83.03%;--y:63.84%;--s:3.1px;--o:0.75;--d:6.34s;--delay:-0.62s"></span>
-<span style="--x:80.71%;--y:62.17%;--s:1.8px;--o:0.37;--d:5.79s;--delay:-1.99s"></span>
-<span style="--x:69.64%;--y:55.50%;--s:2.1px;--o:0.47;--d:6.49s;--delay:-2.30s"></span>
-<span style="--x:32.89%;--y:86.36%;--s:1.8px;--o:0.73;--d:6.03s;--delay:-7.86s"></span>
-<span style="--x:43.04%;--y:84.68%;--s:1.6px;--o:0.50;--d:4.48s;--delay:-4.00s"></span>
-<span style="--x:26.30%;--y:30.09%;--s:1.2px;--o:0.63;--d:7.33s;--delay:-5.20s"></span>
-<span style="--x:9.14%;--y:45.16%;--s:2.1px;--o:0.73;--d:6.89s;--delay:-6.48s"></span>
-<span style="--x:62.57%;--y:50.69%;--s:1.8px;--o:0.37;--d:8.64s;--delay:-5.62s"></span>
-<span style="--x:81.19%;--y:22.83%;--s:1.4px;--o:0.79;--d:8.14s;--delay:-7.77s"></span>
-<span style="--x:54.13%;--y:27.93%;--s:1.4px;--o:0.74;--d:7.96s;--delay:-4.16s"></span>
-<span style="--x:21.36%;--y:44.34%;--s:2.1px;--o:0.59;--d:4.46s;--delay:-4.97s"></span>
-<span style="--x:61.90%;--y:68.77%;--s:2.1px;--o:0.83;--d:5.66s;--delay:-7.72s"></span>
-<span style="--x:64.37%;--y:12.31%;--s:1.6px;--o:0.56;--d:4.25s;--delay:-0.34s"></span>
-<span style="--x:27.78%;--y:88.21%;--s:3.1px;--o:0.40;--d:4.16s;--delay:-5.12s"></span>
-<span style="--x:35.33%;--y:8.19%;--s:2.4px;--o:0.46;--d:8.45s;--delay:-6.32s"></span>
-<span style="--x:25.73%;--y:22.33%;--s:1.6px;--o:0.54;--d:6.95s;--delay:-7.83s"></span>
-<span style="--x:7.24%;--y:54.09%;--s:2.4px;--o:0.85;--d:4.08s;--delay:-2.64s"></span>
-<span style="--x:70.88%;--y:35.46%;--s:2.4px;--o:0.76;--d:5.41s;--delay:-3.85s"></span>
-<span style="--x:57.60%;--y:79.25%;--s:2.1px;--o:0.86;--d:4.97s;--delay:-4.22s"></span>
-<span style="--x:42.44%;--y:37.65%;--s:1.4px;--o:0.50;--d:4.56s;--delay:-0.62s"></span>
-<span style="--x:23.05%;--y:37.31%;--s:3.1px;--o:0.51;--d:4.75s;--delay:-6.83s"></span>
-<span style="--x:32.25%;--y:39.24%;--s:2.4px;--o:0.75;--d:8.41s;--delay:-4.07s"></span>
-<span aria-hidden="true" class="shooting"></span>
-<span aria-hidden="true" class="shooting"></span>
-<span aria-hidden="true" class="shooting"></span>
-</div>
 <img alt="" aria-hidden="true" class="hero-robot-outline" src="assets/img/robot-outline-white.png"/>
 <div class="hero-inner">
 <div aria-label="GigaAI" class="hero-logo-combo">
@@ -994,18 +1025,29 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
 <main>
 <section aria-label="Project video" class="section promo-section" data-section="project-video" id="project-video">
 <div class="promo-video-wrap">
-<video class="promo-video" controls="" data-first-frame="" muted="" playsinline="" preload="auto">
+<div class="video-player"><video aria-label="Video player 1" class="promo-video" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0">
 <source src="assets/videos/promo.mp4#t=0.001" type="video/mp4"/>
-</video>
-<div class="video-control-row">
-<label for="promo-speed">speed</label>
-<select aria-label="Project video playback speed" class="video-speed-select" data-video-speed="" id="promo-speed">
+</video><div class="custom-video-controls" data-video-controls="">
+<button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
+<span aria-hidden="true" data-play-icon="">▶</span>
+</button>
+<span class="video-time" data-time="">0:00 / 0:00</span>
+<input aria-label="Video progress" class="video-progress" data-progress="" max="1000" min="0" step="1" type="range" value="0"/>
+<select aria-label="Project video playback speed" class="video-speed-select" data-video-speed="" id="promo-speed" title="Playback speed">
 <option selected="" value="1">1×</option>
 <option value="1.25">1.25×</option>
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
 </select>
-</div>
+<button aria-label="Unmute video" class="video-control-button" data-action="mute" title="Unmute" type="button"><svg aria-hidden="true" class="volume-icon is-muted" data-volume-icon="" viewbox="0 0 24 24">
+<path class="speaker-shape" d="M4 9h4l5-4v14l-5-4H4z"></path>
+<path class="sound-wave" d="M16.2 9.2c1.25 1.45 1.25 4.15 0 5.6"></path>
+<path class="mute-mark" d="M17.2 9.2l4.8 5.6M22 9.2l-4.8 5.6"></path>
+</svg></button>
+<button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
+<span aria-hidden="true">⛶</span>
+</button>
+</div></div>
 </div>
 </section>
 <section class="section alt" data-section="architecture" id="architecture">
@@ -1144,33 +1186,63 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
 <h3>Demos</h3>
 <div class="demo-grid-inline">
 <article class="demo-card-inline">
-<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-1.mp4#t=0.001" type="video/mp4"/></video>
-<div class="video-control-row"><label for="demo-speed-1">Speed</label><select aria-label="Demo 1 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-1">
+<div class="video-player"><video aria-label="Video player 2" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-1.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
+<span aria-hidden="true" data-play-icon="">▶</span>
+</button>
+<span class="video-time" data-time="">0:00 / 0:00</span>
+<input aria-label="Video progress" class="video-progress" data-progress="" max="1000" min="0" step="1" type="range" value="0"/>
+<select aria-label="Demo 1 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-1" title="Playback speed">
 <option selected="" value="1">1×</option>
 <option value="1.25">1.25×</option>
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
-</select></div>
+</select>
+
+<button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
+<span aria-hidden="true">⛶</span>
+</button>
+</div></div>
 <div class="demo-meta"><h4>Heating Food</h4></div>
 </article>
 <article class="demo-card-inline">
-<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-2.mp4#t=0.001" type="video/mp4"/></video>
-<div class="video-control-row"><label for="demo-speed-2">Speed</label><select aria-label="Demo 2 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-2">
+<div class="video-player"><video aria-label="Video player 3" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-2.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
+<span aria-hidden="true" data-play-icon="">▶</span>
+</button>
+<span class="video-time" data-time="">0:00 / 0:00</span>
+<input aria-label="Video progress" class="video-progress" data-progress="" max="1000" min="0" step="1" type="range" value="0"/>
+<select aria-label="Demo 2 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-2" title="Playback speed">
 <option selected="" value="1">1×</option>
 <option value="1.25">1.25×</option>
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
-</select></div>
+</select>
+
+<button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
+<span aria-hidden="true">⛶</span>
+</button>
+</div></div>
 <div class="demo-meta"><h4>Solid Weighing</h4></div>
 </article>
 <article class="demo-card-inline">
-<video class="demo-video-inline" controls="" data-first-frame="" muted="" playsinline="" preload="auto"><source src="assets/videos/demo-3.mp4#t=0.001" type="video/mp4"/></video>
-<div class="video-control-row"><label for="demo-speed-3">Speed</label><select aria-label="Demo 3 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-3">
+<div class="video-player"><video aria-label="Video player 4" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-3.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
+<span aria-hidden="true" data-play-icon="">▶</span>
+</button>
+<span class="video-time" data-time="">0:00 / 0:00</span>
+<input aria-label="Video progress" class="video-progress" data-progress="" max="1000" min="0" step="1" type="range" value="0"/>
+<select aria-label="Demo 3 playback speed" class="video-speed-select" data-video-speed="" id="demo-speed-3" title="Playback speed">
 <option selected="" value="1">1×</option>
 <option value="1.25">1.25×</option>
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
-</select></div>
+</select>
+
+<button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
+<span aria-hidden="true">⛶</span>
+</button>
+</div></div>
 <div class="demo-meta"><h4>Tableware Arrangement</h4></div>
 </article>
 </div>
@@ -1267,33 +1339,119 @@ table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 14p
       }, { once: true });
     });
 
+    const formatTime = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+      const minutes = Math.floor(seconds / 60);
+      const remaining = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${minutes}:${remaining}`;
+    };
 
-    document.querySelectorAll('select[data-video-speed]').forEach((select) => {
-      const container = select.closest('.promo-video-wrap, .demo-card-inline');
-      const video = container ? container.querySelector('video') : null;
-      if (!video) return;
-
+    document.querySelectorAll('.video-player').forEach((player) => {
+      const video = player.querySelector('video');
+      const controls = player.querySelector('[data-video-controls]');
+      const playButton = controls.querySelector('[data-action="play"]');
+      const playIcon = controls.querySelector('[data-play-icon]');
+      const muteButton = controls.querySelector('[data-action="mute"]');
+      const volumeIcon = controls.querySelector('[data-volume-icon]');
+      const fullscreenButton = controls.querySelector('[data-action="fullscreen"]');
+      const progress = controls.querySelector('[data-progress]');
+      const timeLabel = controls.querySelector('[data-time]');
+      const speedSelect = controls.querySelector('[data-video-speed]');
       const supportedRates = new Set([1, 1.25, 1.5, 2]);
-      video.preload = 'auto';
+
+      const updatePlayState = () => {
+        const isPlaying = !video.paused && !video.ended;
+        playIcon.textContent = isPlaying ? '❚❚' : '▶';
+        playButton.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');
+        playButton.title = isPlaying ? 'Pause' : 'Play';
+      };
+
+      const updateVolumeState = () => {
+        if (!muteButton || !volumeIcon) return;
+        const muted = video.muted || video.volume === 0;
+        volumeIcon.classList.toggle('is-muted', muted);
+        muteButton.setAttribute('aria-label', muted ? 'Unmute video' : 'Mute video');
+        muteButton.title = muted ? 'Unmute' : 'Mute';
+      };
+
+      const updateTimeline = () => {
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
+        const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+        progress.value = duration > 0 ? Math.round((current / duration) * 1000) : 0;
+        timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      };
 
       const applyPlaybackRate = () => {
-        const requestedRate = Number.parseFloat(select.value);
-        const rate = supportedRates.has(requestedRate) ? requestedRate : 1;
-
+        const requested = Number.parseFloat(speedSelect.value);
+        const rate = supportedRates.has(requested) ? requested : 1;
         video.defaultPlaybackRate = rate;
         video.playbackRate = rate;
       };
 
-      select.addEventListener('change', applyPlaybackRate);
+      const togglePlayback = () => {
+        if (video.paused || video.ended) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      };
 
-      // Some browsers reset playbackRate after loading a local MP4 or
-      // when playback restarts, so re-apply the selected value.
-      video.addEventListener('loadedmetadata', applyPlaybackRate);
-      video.addEventListener('play', applyPlaybackRate);
+      playButton.addEventListener('click', togglePlayback);
+      video.addEventListener('click', togglePlayback);
+      video.addEventListener('play', () => {
+        applyPlaybackRate();
+        updatePlayState();
+      });
+      video.addEventListener('pause', updatePlayState);
+      video.addEventListener('ended', updatePlayState);
 
+      video.addEventListener('loadedmetadata', () => {
+        applyPlaybackRate();
+        updateTimeline();
+      });
+      video.addEventListener('timeupdate', updateTimeline);
+      video.addEventListener('durationchange', updateTimeline);
+
+      progress.addEventListener('input', () => {
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+        video.currentTime = (Number(progress.value) / 1000) * video.duration;
+      });
+
+      speedSelect.addEventListener('change', applyPlaybackRate);
+
+      if (muteButton) {
+        muteButton.addEventListener('click', () => {
+          video.muted = !video.muted;
+          updateVolumeState();
+        });
+        video.addEventListener('volumechange', updateVolumeState);
+      }
+
+      fullscreenButton.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else if (player.requestFullscreen) {
+            await player.requestFullscreen();
+          } else if (video.webkitEnterFullscreen) {
+            video.webkitEnterFullscreen();
+          }
+        } catch (_) {}
+      });
+
+      player.addEventListener('keydown', (event) => {
+        if (event.target.matches('select, input, button')) return;
+        if (event.code === 'Space') {
+          event.preventDefault();
+          togglePlayback();
+        }
+      });
+
+      updatePlayState();
+      updateVolumeState();
+      updateTimeline();
       applyPlaybackRate();
     });
-
 
   </script>
 </body>
