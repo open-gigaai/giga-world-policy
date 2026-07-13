@@ -872,9 +872,7 @@ h2 {
     .full-figure { max-width: 1160px; margin: 0 auto; }
     .full-figure img { max-height: 465px; object-fit: contain; }
     .architecture-upload { border: 0; border-radius: 10px; }
-    .simulation-summary-card { max-width: 760px; margin: 0 auto; }
-    .simulation-summary { min-width: 560px; }
-    .realworld-tables { display: grid; gap: 24px; }
+.realworld-tables { display: grid; gap: 24px; }
     .result-table-group { min-width: 0; }
     .detailed-table { min-width: 1040px; font-size: 13.5px; }
     .detailed-table th,
@@ -892,6 +890,12 @@ h2 {
       border-bottom: 1px solid #e5eaf2;
     }
     .demos-inline h3 { margin-bottom: 18px; font-size: 25px; }
+
+    .realworld-results-block .demos-inline {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
     .demo-grid-inline {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1017,7 +1021,6 @@ h2 {
 <a class="pill primary" href="#" title="arXiv(PDF)"><span class="arxiv-badge">arXiv</span><span>Paper (PDF)</span></a>
 <a class="pill" href="https://github.com/open-gigaai/giga-world-policy" title="GitHub(repo)"><span aria-hidden="true" class="icon"><svg class="github-icon" role="img" viewbox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.01c-3.2.7-3.87-1.38-3.87-1.38-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.11-.75.41-1.26.74-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .98-.31 3.18 1.18A11.1 11.1 0 0 1 12 6.16c.98 0 1.96.13 2.88.39 2.2-1.49 3.17-1.18 3.17-1.18.64 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.42-2.69 5.39-5.26 5.67.42.36.79 1.07.79 2.16v3.03c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path></svg></span><span>Code</span></a>
 <a class="pill" href="#" title="HugingFace(model)"><span aria-hidden="true" class="icon">🤗</span><span>Model</span></a>
-<a class="pill" href="#" title="TODO: replace with dataset link"><span aria-hidden="true" class="icon">🤗</span><span>Dataset</span></a>
 <a class="pill" href="#project-video" title="View the project video"><span aria-hidden="true" class="icon"><svg class="video-icon" role="img" viewbox="0 0 24 24"><rect height="14" rx="3.2" width="17" x="3.5" y="5"></rect><path d="M10 9.2v5.6l5-2.8-5-2.8Z" fill="currentColor" stroke="none"></path></svg></span><span>Video</span></a>
 </div>
 </div>
@@ -1150,25 +1153,9 @@ h2 {
 <section class="section content-section" data-section="experiments" id="experiments">
 <div class="section-inner">
 <div class="page-title"><h2>Experiments</h2></div>
-<article class="paper-block">
+<article class="paper-block realworld-results-block">
 <div class="subsection-title-row simple">
-<div><span class="section-index">01</span><h3>Simulation Results</h3></div>
-</div>
-<p class="paper-caption table-caption"><strong>Table: </strong> Average success rates on RoboTwin 2.0 over 50+ simulation tasks under clean and randomized settings.</p><div class="table-card simulation-summary-card">
-<table aria-label="RoboTwin simulation average success rates" class="research-table simulation-summary">
-<thead><tr><th>Method</th><th>Clean</th><th>Randomized</th></tr></thead>
-<tbody>
-<tr><td>π0.5</td><td>0.43</td><td>0.44</td></tr>
-<tr><td>X-VLA</td><td>0.73</td><td>0.73</td></tr>
-<tr><td>Motus</td><td><strong>0.89</strong></td><td><strong>0.87</strong></td></tr>
-<tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td>0.87</td><td>0.85</td></tr>
-</tbody>
-</table>
-</div>
-</article>
-<article class="paper-block">
-<div class="subsection-title-row simple">
-<div><span class="section-index">02</span><h3>Real-World Results</h3></div>
+<div><span class="section-index">01</span><h3>Real-World Results</h3></div>
 </div><div class="long-horizon-layout">
 <div class="result-table-group compact-long-table">
 <p class="paper-caption table-caption"><strong>Table: </strong> Evaluation of end-to-end success rates on long-horizon tasks.</p><div class="table-card">
@@ -1198,7 +1185,6 @@ h2 {
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
 </select>
-
 <button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
 <span aria-hidden="true">⛶</span>
 </button>
@@ -1218,7 +1204,6 @@ h2 {
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
 </select>
-
 <button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
 <span aria-hidden="true">⛶</span>
 </button>
@@ -1238,13 +1223,18 @@ h2 {
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
 </select>
-
 <button aria-label="Enter fullscreen" class="video-control-button" data-action="fullscreen" title="Fullscreen" type="button">
 <span aria-hidden="true">⛶</span>
 </button>
 </div></div>
 <div class="demo-meta"><h4>Tableware Arrangement</h4></div>
 </article>
+</div>
+</div>
+</article><article class="paper-block text-following-block"><div class="subsection-title-row simple">
+<div>
+<span class="section-index">02</span>
+<h3>Text-Following Ability</h3>
 </div>
 </div><div class="realworld-tables">
 <div class="result-table-group">
@@ -1283,8 +1273,7 @@ h2 {
 </table>
 </div>
 </div>
-</div>
-</article>
+</div></article>
 </div>
 </section>
 <section class="section" data-section="citation" id="citation">
