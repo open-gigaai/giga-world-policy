@@ -537,255 +537,102 @@ class WAPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         else:
             boundary_timestep = None
 
-        profile_core_forward = bool(getattr(self, "_profile_core_forward_latency", False))
-        profile_denoising_loop = bool(getattr(self, "_profile_denoising_loop_latency", False))
-        denoising_loop_repeat = getattr(self, "_denoising_loop_repeat_override", None)
-        if denoising_loop_repeat is not None:
-            denoising_loop_repeat = max(1, int(denoising_loop_repeat))
-        use_cuda_timing = (
-            (profile_core_forward or profile_denoising_loop)
-            and str(device).startswith("cuda")
-            and torch.cuda.is_available()
-        )
-        core_forward_events = []
-        core_forward_times_s = []
-        denoising_loop_events = []
-        denoising_loop_wall_times_s = []
-        denoising_loop_count = denoising_loop_repeat or 1
-        progress_total = denoising_loop_count * len(timesteps)
-        initial_action = action.detach().clone() if denoising_loop_repeat is not None else None
+        with self.progress_bar(total=len(timesteps)) as progress_bar:
+            for i, t in enumerate(timesteps):
+                if self.interrupt:
+                    continue
 
-        with self.progress_bar(total=progress_total) as progress_bar:
-            for denoising_loop_idx in range(denoising_loop_count):
-                if denoising_loop_repeat is not None:
-                    action = initial_action.clone()
-                    self.action_scheduler.set_timesteps(num_inference_steps, device=device)
+                self._current_timestep = t
 
-                if profile_denoising_loop:
-                    if str(device).startswith("cuda") and torch.cuda.is_available():
-                        torch.cuda.synchronize(device)
-                    denoising_loop_start_time = time.perf_counter()
-                    if use_cuda_timing:
-                        denoising_loop_start_event = torch.cuda.Event(enable_timing=True)
-                        denoising_loop_end_event = torch.cuda.Event(enable_timing=True)
-                        denoising_loop_start_event.record()
+                if boundary_timestep is None or t >= boundary_timestep:
+                    # wan2.1 or high-noise stage in wan2.2
+                    current_model = self.transformer
+                    current_guidance_scale = guidance_scale
+                else:
+                    # low-noise stage in wan2.2
+                    current_model = self.transformer_2
+                    current_guidance_scale = guidance_scale_2
 
-                for i, t in enumerate(timesteps):
-                    if self.interrupt:
-                        continue
+                if self.config.expand_timesteps:
+                    latent_model_input = (1 - first_frame_mask) * condition + first_frame_mask * latents
+                    latent_model_input = latent_model_input.to(transformer_dtype)
 
-                    self._current_timestep = t
+                    # seq_len: num_latent_frames * (latent_height // patch_size) * (latent_width // patch_size)
+                    temp_ts = (first_frame_mask[0][0][:, ::2, ::2] * t).flatten()
+                    # batch_size, seq_len
+                    timestep = temp_ts.unsqueeze(0).expand(latents.shape[0], -1)
+                else:
+                    latent_model_input = torch.cat([latents, condition], dim=1).to(transformer_dtype)
+                    timestep = t.expand(latents.shape[0])
 
-                    if boundary_timestep is None or t >= boundary_timestep:
-                        # wan2.1 or high-noise stage in wan2.2
-                        current_model = self.transformer
-                        current_guidance_scale = guidance_scale
-                    else:
-                        # low-noise stage in wan2.2
-                        current_model = self.transformer_2
-                        current_guidance_scale = guidance_scale_2
+                num_state_tokens = state.shape[1]
+                num_action_tokens = action.shape[1]
+                noise_t = timestep[:, -2:-1]
 
-                    if self.config.expand_timesteps:
-                        latent_model_input = (1 - first_frame_mask) * condition + first_frame_mask * latents
-                        latent_model_input = latent_model_input.to(transformer_dtype)
+                frame_per_tokens = first_frame_mask.shape[-1] * first_frame_mask.shape[-2] // 4
+                num_latent_tokens = frame_per_tokens * first_frame_mask.shape[2]
+                timestep = torch.zeros(
+                    1,
+                    num_state_tokens + num_action_tokens + num_latent_tokens,
+                    device=latent_model_input.device,
+                    dtype=latent_model_input.dtype,
+                )
+                num_clean_latent_tokens = frame_per_tokens
+                timestep[:, num_state_tokens + num_clean_latent_tokens :] = noise_t
 
-                        # seq_len: num_latent_frames * (latent_height // patch_size) * (latent_width // patch_size)
-                        temp_ts = (first_frame_mask[0][0][:, ::2, ::2] * t).flatten()
-                        # batch_size, seq_len
-                        timestep = temp_ts.unsqueeze(0).expand(latents.shape[0], -1)
-                    else:
-                        latent_model_input = torch.cat([latents, condition], dim=1).to(transformer_dtype)
-                        timestep = t.expand(latents.shape[0])
-
-                    num_state_tokens = state.shape[1]
-                    num_action_tokens = action.shape[1]
-                    noise_t = timestep[:, -2:-1]
-                    extra_timestep = torch.zeros(1, num_state_tokens + num_action_tokens, device=timesteps.device, dtype=timesteps.dtype)
-                    extra_timestep[:, num_state_tokens:] = noise_t
-
-                    frame_per_tokens = first_frame_mask.shape[-1] * first_frame_mask.shape[-2] // 4
-                    num_latent_tokens = frame_per_tokens * first_frame_mask.shape[2]
-                    timestep = torch.zeros(
-                        1, num_state_tokens + num_action_tokens + num_latent_tokens, device=latent_model_input.device, dtype=latent_model_input.dtype
+                with current_model.cache_context("cond"):
+                    action_pred = current_model(
+                        ref_latents=latent_model_input[:, :, :1],
+                        noisy_latents=latent_model_input[:, :, 1:],
+                        timestep=timestep,
+                        encoder_hidden_states=prompt_embeds,
+                        return_dict=False,
+                        action=action,
+                        state=state,
+                        action_only=True,
                     )
-                    num_clean_latent_tokens = frame_per_tokens
-                    timestep[:, num_state_tokens + num_clean_latent_tokens :] = noise_t
 
-                    with current_model.cache_context("cond"):
-                        if profile_core_forward and use_cuda_timing:
-                            core_start_event = torch.cuda.Event(enable_timing=True)
-                            core_end_event = torch.cuda.Event(enable_timing=True)
-                            core_start_event.record()
-                        elif profile_core_forward:
-                            core_start_time = time.perf_counter()
-
-                        action_pred = current_model(
-                            ref_latents=latent_model_input[:, :, :1],
-                            noisy_latents=latent_model_input[:, :, 1:],
+                if self.do_classifier_free_guidance:
+                    with current_model.cache_context("uncond"):
+                        noise_uncond = current_model(
+                            hidden_states=latent_model_input,
                             timestep=timestep,
-                            encoder_hidden_states=prompt_embeds,
-                            # encoder_hidden_states_image=image_embeds,
-                            # attention_kwargs=attention_kwargs,
+                            encoder_hidden_states=negative_prompt_embeds,
+                            encoder_hidden_states_image=image_embeds,
+                            attention_kwargs=attention_kwargs,
                             return_dict=False,
                             action=action,
-                            state=state,
-                            # extra_timestep=extra_timestep,
                             action_only=True,
                         )
+                        noise_pred = noise_uncond + current_guidance_scale * (noise_pred - noise_uncond)
 
-                        if profile_core_forward and use_cuda_timing:
-                            core_end_event.record()
-                            core_forward_events.append((core_start_event, core_end_event))
-                        elif profile_core_forward:
-                            core_forward_times_s.append(time.perf_counter() - core_start_time)
+                # compute the previous noisy sample x_t -> x_t-1
+                action = self.action_scheduler.step(action_pred, t, action, return_dict=False)[0]
 
-                    if self.do_classifier_free_guidance:
-                        with current_model.cache_context("uncond"):
-                            noise_uncond = current_model(
-                                hidden_states=latent_model_input,
-                                timestep=timestep,
-                                encoder_hidden_states=negative_prompt_embeds,
-                                encoder_hidden_states_image=image_embeds,
-                                attention_kwargs=attention_kwargs,
-                                return_dict=False,
-                                action=action,
-                                action_only=True,
-                            )
-                            noise_pred = noise_uncond + current_guidance_scale * (noise_pred - noise_uncond)
+                if callback_on_step_end is not None:
+                    callback_kwargs = {}
+                    for k in callback_on_step_end_tensor_inputs:
+                        callback_kwargs[k] = locals()[k]
+                    callback_outputs = callback_on_step_end(self, i, t, callback_kwargs)
 
-                    # compute the previous noisy sample x_t -> x_t-1
-                    action = self.action_scheduler.step(action_pred, t, action, return_dict=False)[0]
+                    latents = callback_outputs.pop("latents", latents)
+                    prompt_embeds = callback_outputs.pop("prompt_embeds", prompt_embeds)
+                    negative_prompt_embeds = callback_outputs.pop("negative_prompt_embeds", negative_prompt_embeds)
 
-                    if callback_on_step_end is not None:
-                        callback_kwargs = {}
-                        for k in callback_on_step_end_tensor_inputs:
-                            callback_kwargs[k] = locals()[k]
-                        callback_outputs = callback_on_step_end(self, i, t, callback_kwargs)
+                # call the callback, if provided
+                if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
+                    progress_bar.update()
 
-                        latents = callback_outputs.pop("latents", latents)
-                        prompt_embeds = callback_outputs.pop("prompt_embeds", prompt_embeds)
-                        negative_prompt_embeds = callback_outputs.pop("negative_prompt_embeds", negative_prompt_embeds)
-
-                    # call the callback, if provided
-                    if denoising_loop_repeat is not None:
-                        progress_bar.update()
-                    elif i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
-                        progress_bar.update()
-
-                    if XLA_AVAILABLE:
-                        xm.mark_step()
-
-                if profile_denoising_loop:
-                    if use_cuda_timing:
-                        denoising_loop_end_event.record()
-                        denoising_loop_events.append((denoising_loop_start_event, denoising_loop_end_event))
-                    if str(device).startswith("cuda") and torch.cuda.is_available():
-                        torch.cuda.synchronize(device)
-                    denoising_loop_wall_times_s.append(time.perf_counter() - denoising_loop_start_time)
-
-        if profile_core_forward:
-            if use_cuda_timing and core_forward_events:
-                torch.cuda.synchronize(device)
-                core_forward_times_s = [
-                    start_event.elapsed_time(end_event) / 1000.0
-                    for start_event, end_event in core_forward_events
-                ]
-            self._last_core_forward_latencies_s = core_forward_times_s
-            self._last_core_forward_latency_s = float(sum(core_forward_times_s))
-        else:
-            self._last_core_forward_latencies_s = []
-            self._last_core_forward_latency_s = None
-
-        if profile_denoising_loop:
-            denoising_loop_cuda_times_s = []
-            if use_cuda_timing and denoising_loop_events:
-                torch.cuda.synchronize(device)
-                denoising_loop_cuda_times_s = [
-                    start_event.elapsed_time(end_event) / 1000.0
-                    for start_event, end_event in denoising_loop_events
-                ]
-            self._last_denoising_loop_latencies_s = denoising_loop_wall_times_s
-            self._last_denoising_loop_cuda_latencies_s = denoising_loop_cuda_times_s
-            self._last_denoising_loop_latency_s = float(sum(denoising_loop_wall_times_s))
-        else:
-            self._last_denoising_loop_latencies_s = []
-            self._last_denoising_loop_cuda_latencies_s = []
-            self._last_denoising_loop_latency_s = None
+                if XLA_AVAILABLE:
+                    xm.mark_step()
 
         if not return_dict:
             return action
 
 
-def load_video(video, valid_range=None, sample_frames=None, sample_stride=1, sample_method=2, max_frames=None):
-    if sample_frames is not None:
-        assert max_frames is None
-    if valid_range is None:
-        valid_range = (0, len(video))
-    video_length = valid_range[1] - valid_range[0]
-    if sample_frames is None:
-        sample_indexes = np.arange(valid_range[0], valid_range[1], sample_stride, dtype=int)
-        if max_frames is not None and len(sample_indexes) > max_frames:
-            sample_indexes = sample_indexes[:max_frames]
-    elif sample_frames >= video_length:
-        sample_indexes = np.arange(valid_range[0], valid_range[1], dtype=int)
-    else:
-        sample_length = min(video_length, (sample_frames - 1) * sample_stride + 1)
-        sample_indexes = np.linspace(valid_range[0], valid_range[0] + sample_length - 1, sample_frames, dtype=int)
-    images = [video[index] for index in sample_indexes]
-    return images, sample_indexes
-
-
-from giga_datasets import image_utils
 from torchvision.transforms import InterpolationMode
 from torchvision.transforms import functional as F
 
-
-def read_video(video_path):
-    from torchvision.io import VideoReader as TorchVideoReader
-
-    reader = TorchVideoReader(video_path, 'video')
-    cv_frame_list = []
-    frame_count = 0
-    for frame in reader:
-        frame_count += 1
-        last_pts = frame['pts']
-        frame_np = frame['data'].cpu().numpy()
-        # 将帧转换为 NumPy 数组（HWC 格式）
-        # (3, 480, 640) -> (480, 640, 3)
-        frame_np = np.transpose(frame_np, (1, 2, 0))
-        cv_frame = frame_np
-        cv_frame_list.append(cv_frame)  # hdf5 -> mp4
-    cv_frame_list = np.array(cv_frame_list)
-    return cv_frame_list
-
-
-def process_video(video, dst_size):
-    sample_info = {
-        "sample_frames": len(video),
-        "sample_stride": 1,
-    }
-    images, sample_indexes = load_video(video, **sample_info)
-    print("sample_indexes:", sample_indexes)
-    height, width = images[0].height, images[0].width
-    dst_width, dst_height = image_utils.get_image_size((width, height), dst_size, mode='area', multiple=32)
-    print(dst_width, dst_height)
-    if float(dst_height) / height < float(dst_width) / width:
-        new_height = int(round(float(dst_width) / width * height))
-        new_width = dst_width
-    else:
-        new_height = dst_height
-        new_width = int(round(float(dst_height) / height * width))
-    assert new_width >= dst_width and new_height >= dst_height
-    x1 = (new_width - dst_width) // 2
-    y1 = (new_height - dst_height) // 2
-    input_images = []
-    for i in range(len(images)):
-        image = F.resize(images[i], (new_height, new_width), InterpolationMode.BILINEAR)
-        image = F.crop(image, y1, x1, dst_height, dst_width)
-        input_images.append(image)
-    # ref_image
-    ref_image = input_images[0]
-    return ref_image, input_images, sample_indexes
 
 def process_images(input_images, dst_width, dst_height):
     height = input_images.height
@@ -805,7 +652,6 @@ def process_images(input_images, dst_width, dst_height):
 
 def get_ref_image_3views(images, dst_size, layout="tshape"):
     dst_width, dst_height = dst_size
-    print(f"=========== dst_size: {dst_width} {dst_height} ============")
     img_front, img_left, img_right = images
 
     if layout == "tshape":
@@ -988,31 +834,14 @@ def get_policy(
     guidance_scale = 0.0
     num_inference_steps = 10
 
-    state_mean = torch.tensor(stats_dict['norm_stats']['observation.state']['mean']).to(device=device)
-    state_std = torch.tensor(stats_dict['norm_stats']['observation.state']['std']).to(device=device)
     state_min = torch.tensor(stats_dict['norm_stats']['observation.state']['q01'])[..., :14].to(device=device)
     state_max = torch.tensor(stats_dict['norm_stats']['observation.state']['q99'])[..., :14].to(device=device)
 
-    delta_mean = torch.tensor(stats_dict['norm_stats']['action']['mean'][:14]).to(device=device)
-    delta_std = torch.tensor(stats_dict['norm_stats']['action']['std'][:14]).to(device=device)
     delta_min = torch.tensor(stats_dict['norm_stats']['action']['q01'][:14])[..., :14].to(device=device)
     delta_max = torch.tensor(stats_dict['norm_stats']['action']['q99'][:14])[..., :14].to(device=device)
-    eps = 1e-8  # 小的epsilon值防止除零
+    eps = 1e-8
     state_range = (state_max - state_min).clamp_min(eps)
     delta_range = (delta_max - delta_min).clamp_min(eps)
-    # state_min = torch.from_numpy(stats_dict['state_min']).to(device=device, dtype=torch.float32)
-    # state_max = torch.from_numpy(stats_dict['state_max']).to(device=device, dtype=torch.float32)
-
-    # The server does not need the dataset: open-loop replay/debug paths are disabled and
-    # the client streams observations over the socket. Keep `dataset` as None so the
-    # (disabled) replay/debug branches below remain valid closures.
-    dataset = None
-    replay_action = False
-    replay_index = 0
-
-    replay_action = False
-    replay_image = False
-    debug = False
 
     if fixed_t5_path is None and data_paths:
         fixed_t5_path = os.path.join(data_paths[0], "t5_embedding", f"episode_{int(data_idx):06d}.pt")
@@ -1026,67 +855,20 @@ def get_policy(
             print(f"Loaded fixed T5 embedding from: {fixed_t5_path}, shape={tuple(fixed_prompt_embedding.shape)}")
 
     def inference(self, data):
-        if replay_action:
-            if not hasattr(self, 'replay_index'):
-                self.replay_index = 0
-            action = dataset[data_idx]['action'][self.replay_index : self.replay_index + action_chunk]
-            self.replay_index += action_chunk
-            self.replay_index = self.replay_index % len(dataset[data_idx]['action'])
-            return None, action
+        images = {
+            'observation.images.cam_high': data['observation.images.cam_high'],  # 3 H W, tensor float64
+            'observation.images.cam_left_wrist': data['observation.images.cam_left_wrist'],  # 3 H W, tensor float64
+            'observation.images.cam_right_wrist': data['observation.images.cam_right_wrist'],  # 3 H W, tensor float64
+        }
 
-        if replay_image:
-            if not hasattr(self, 'replay_index'):
-                self.replay_index = 0
-            frame = dataset[data_idx]['video'][self.replay_index].asnumpy()  # decord NDArray -> numpy
-            ref_image = Image.fromarray(frame)
-            state = torch.tensor(dataset[data_idx]['state'][self.replay_index]).to(device)
+        state = data['observation.state'].to(device)
 
-            # state = data['observation.state'].to(device)
-
-            state = torch.zeros_like(data['observation.state']).to(device)
-            self.replay_index += action_chunk
-
-        if not replay_image:
-            if debug:
-                if not hasattr(self, 'replay_index'):
-                    self.replay_index = 0
-                frame = dataset[data_idx]['video'][self.replay_index].asnumpy()  # decord NDArray -> numpy
-                ref_image_1 = Image.fromarray(frame)
-                state_1 = torch.tensor(dataset[data_idx]['state'][self.replay_index]).to(device)
-                self.replay_index += action_chunk
-
-            images = {
-                'observation.images.cam_high': data['observation.images.cam_high'],  # 3 H W, tensor float64
-                'observation.images.cam_left_wrist': data['observation.images.cam_left_wrist'],  # 3 H W, tensor float64
-                'observation.images.cam_right_wrist': data['observation.images.cam_right_wrist'],  # 3 H W, tensor float64
-            }
-
-            state = data['observation.state'].to(device)
-
-            pil_images = [
-                PIL.Image.fromarray((images['observation.images.cam_high'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
-                PIL.Image.fromarray((images['observation.images.cam_left_wrist'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
-                PIL.Image.fromarray((images['observation.images.cam_right_wrist'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
-            ]
-            ref_image = get_ref_image_3views(pil_images, dst_size)
-
-            if debug:
-                # 图像 PSNR
-                import torch.nn.functional as F
-
-                a = np.array(ref_image).astype(np.float64)
-                b = np.array(ref_image_1).astype(np.float64)
-                mse_img = np.mean((a - b) ** 2)
-                psnr = 20 * np.log10(255.0 / np.sqrt(mse_img)) if mse_img > 0 else float('inf')
-                print(f"[DEBUG] image  MSE: {mse_img:.4f}, PSNR: {psnr:.2f} dB")
-
-                # state 差距
-                s0 = state[..., :14]
-                s1 = state_1[..., :14]
-                diff = (s0 - s1).abs()
-                print(
-                    f"[DEBUG] state  max_diff: {diff.max().item():.6f}, mean_diff: {diff.mean().item():.6f}, MSE: {F.mse_loss(s0.float(), s1.float()).item():.6f}"
-                )
+        pil_images = [
+            PIL.Image.fromarray((images['observation.images.cam_high'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
+            PIL.Image.fromarray((images['observation.images.cam_left_wrist'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
+            PIL.Image.fromarray((images['observation.images.cam_right_wrist'].permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
+        ]
+        ref_image = get_ref_image_3views(pil_images, dst_size)
 
         state = state[..., :14]
 
@@ -1097,11 +879,8 @@ def get_policy(
             ref_episode_dir = os.path.join(ref_image_save_dir, f"episode_{int(episode_idx)}")
             os.makedirs(ref_episode_dir, exist_ok=True)
             ref_image.save(os.path.join(ref_episode_dir, f"chunk_{chunk_idx:04d}.png"))
-        # min-max
         eps = 1e-8
         norm_state = ((state - state_min) / state_range) * 2 - 1
-        if not quiet:
-            print(norm_state.max(), norm_state.min())
 
         norm_state = norm_state.to(device)
         if norm_state.ndim == 1:
@@ -1118,35 +897,20 @@ def get_policy(
         if str(device).startswith("cuda") and torch.cuda.is_available():
             torch.cuda.synchronize(torch.device(device))
         model_start_time = time.perf_counter()
-        denoising_loop_repeat = data.get("_denoising_loop_repeat", None)
-        request_num_inference_steps = int(data.get("_num_inference_steps", num_inference_steps))
-        old_denoising_loop_repeat = getattr(pipe, "_denoising_loop_repeat_override", None)
-        if denoising_loop_repeat is not None:
-            pipe._denoising_loop_repeat_override = int(denoising_loop_repeat)
-        try:
-            pred_action = pipe(
-                height=dst_size[1],
-                width=dst_size[0],
-                action_chunk=action_chunk,
-                state=norm_state,
-                num_frames=5,
-                guidance_scale=guidance_scale,
-                num_inference_steps=request_num_inference_steps,
-                image=ref_image,
-                return_dict=False,
-                prompt_embeds=prompt_embedding,
-                prompt=prompt,
-                action_dim=32,
-            )
-        finally:
-            if denoising_loop_repeat is not None:
-                if old_denoising_loop_repeat is None:
-                    try:
-                        delattr(pipe, "_denoising_loop_repeat_override")
-                    except AttributeError:
-                        pass
-                else:
-                    pipe._denoising_loop_repeat_override = old_denoising_loop_repeat
+        pred_action = pipe(
+            height=dst_size[1],
+            width=dst_size[0],
+            action_chunk=action_chunk,
+            state=norm_state,
+            num_frames=5,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            image=ref_image,
+            return_dict=False,
+            prompt_embeds=prompt_embedding,
+            prompt=prompt,
+            action_dim=32,
+        )
         if str(device).startswith("cuda") and torch.cuda.is_available():
             torch.cuda.synchronize(torch.device(device))
         model_end_time = time.perf_counter()
@@ -1154,20 +918,8 @@ def get_policy(
         if not quiet:
             print(f"Model inference time: {self._last_model_inference_s:.6f} seconds", flush=True)
 
-        # gt_action = torch.tensor(data['gt_action']).to(pred_action.device)
-        # gt_action = (gt_action - delta_min) / delta_range
-        # mse = torch.nn.functional.mse_loss(pred_action.squeeze(0), gt_action)
-        # mse_per_dim = torch.mean((pred_action.squeeze(0) - gt_action) ** 2, dim=0)
-        # self._last_norm_mse = mse.item()
-        # self._last_norm_mse_per_dim = mse_per_dim.detach().cpu().numpy()
-        # print(f"[norm] MSE: {self._last_norm_mse:.6f}, MSE per dim: {self._last_norm_mse_per_dim}")
-        # min-max
         pred_action = pred_action[..., :14]
         pred_action = ((pred_action + 1) / 2) * delta_range + delta_min
-        if not quiet:
-            print('pred_action ', pred_action.max(), pred_action.min())
-        # z-score
-        # pred_action = pred_action * delta_std + delta_mean
         pred_action = pred_action.cpu().numpy()
         mask = np.array([True] * 6 + [False] + [True] * 6 + [False])
         pred_action = pred_action[0] + state.repeat(action_chunk, 1).cpu().numpy() * mask
@@ -1304,9 +1056,6 @@ def inference_client(
     all_pred_delta = []
     all_mse = []
     all_mse_per_dim = []
-    all_norm_mse = []
-    all_norm_mse_per_dim = []
-
     pipe = RobotInferenceClient(host=host, port=port)
 
     os.makedirs(save_dir, exist_ok=True)
@@ -1340,7 +1089,6 @@ def inference_client(
         state = torch.from_numpy(state).float().unsqueeze(0)
         gt_action = all_action[start_frame:end_frame,:14]
 
-        # 图像始终从第0帧取
         img_front = front_view_images[start_frame]
         img_left = left_view_images[start_frame]
         img_right = right_view_images[start_frame]
@@ -1354,7 +1102,6 @@ def inference_client(
         camera_right_chw = rearrange(img_right, 'h w c -> c h w')
         prompt_embedding = episode_t5_embedding[:64]
         prompt_embedding = torch_F.pad(prompt_embedding, (0, 0, 0, 64 - prompt_embedding.shape[0]), value=0.0)[None]
-        print(prompt_embedding.shape)
         observation = {
             'observation.state': state,
             'gt_action': gt_action,
@@ -1374,9 +1121,6 @@ def inference_client(
         chunk_mse_per_dim = np.mean((pred_action - gt_action) ** 2, axis=0)
         all_mse.append(chunk_mse)
         all_mse_per_dim.append(chunk_mse_per_dim)
-        if hasattr(pipe, '_last_norm_mse'):
-            all_norm_mse.append(pipe._last_norm_mse)
-            all_norm_mse_per_dim.append(pipe._last_norm_mse_per_dim)
         print(f"[chunk {i:04d}] action MSE: {chunk_mse:.6f}, per dim: {chunk_mse_per_dim}")
 
         # Only the first `replan` executed actions feed the aggregated open-loop trajectory.
@@ -1389,7 +1133,6 @@ def inference_client(
         all_gt_delta.append(exec_gt - exec_state)
         all_pred_delta.append(exec_pred - exec_state)
 
-        # 每个 chunk 单独保存曲线（完整预测 horizon）
         chunk_save_dir = os.path.join(save_dir, 'all', f'episode_{id}', f'chunk_{i:04d}')
         os.makedirs(chunk_save_dir, exist_ok=True)
         save_action_as_plot(gt_action, pred_action, os.path.join(chunk_save_dir, 'action_plot.png'))
@@ -1416,13 +1159,6 @@ def inference_client(
     print(f"Overall MSE (all timesteps): {overall_mse:.6f}")
     print(f"Average MSE per dimension: {avg_mse_per_dim}")
     print(f"Overall MSE per dimension: {overall_mse_per_dim}")
-
-    if all_norm_mse:
-        avg_norm_mse = np.mean(all_norm_mse)
-        avg_norm_mse_per_dim = np.mean(np.stack(all_norm_mse_per_dim), axis=0)
-        print(f"\n=== Action MSE Summary (normalized, {len(all_norm_mse)} chunks) ===")
-        print(f"Average chunk MSE: {avg_norm_mse:.6f}")
-        print(f"Average MSE per dimension: {avg_norm_mse_per_dim}")
 
 def parse_args():
     parser = argparse.ArgumentParser(
