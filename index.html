@@ -4,10 +4,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Models." name="description"/>
+<meta content="GigaWorld-Policy-0.5: A Faster and Stronger World Action Model empowered by AutoResearch." name="description"/>
 <meta content="#ffffff" name="theme-color"/>
 <link href="https://open-gigaai.github.io/giga-world-policy/" rel="canonical"/>
-<title>GigaWorld-Policy-0.5</title>
+<title>GigaWorld-Policy-0.5: A Faster and Stronger WAM Empowered by AutoResearch</title>
 <style>
     :root {
       --paper: #ffffff;
@@ -257,7 +257,7 @@
     .hero-title-sub {
       display: block;
       margin-top: 10px;
-      font-size: clamp(30px, 3vw, 37px);
+      font-size: clamp(31px, 3.15vw, 40px);
       letter-spacing: -0.050em;
       white-space: nowrap;
     }
@@ -802,10 +802,18 @@ h2 {
     }
     .research-table tbody tr:last-child td { border-bottom: 0; }
     .research-table tbody tr:hover { background: #fafcff; }
-    .research-table .best-cell,
-    .research-table td.gain { color: #087a58; font-weight: 850; background: rgba(16,185,129,0.075); }
+    .research-table .best-cell {
+      color: #087a58;
+      font-weight: 850;
+      background: rgba(16,185,129,0.105);
+    }
     .ours-row td { background: rgba(57,213,238,0.095); font-weight: 750; }
     .average-row td { background: #f1f5f9; font-weight: 850; }
+    .research-table .best-row td {
+      color: #087a58;
+      font-weight: 850;
+      background: rgba(16,185,129,0.105);
+    }
     .paper-caption,
     .paper-figure figcaption {
       margin: 12px 4px 0;
@@ -818,49 +826,7 @@ h2 {
       color: #4f5b6d;
       font-weight: 560;
     }
-    .feature-split {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-      gap: 30px;
-      align-items: center;
-    }
-    .compact-table-card {
-      overflow: hidden;
-    }
-
-    .compact-table {
-      width: 100%;
-      min-width: 0;
-      table-layout: fixed;
-      font-size: 13px;
-    }
-
-    .compact-table th,
-    .compact-table td {
-      padding: 8px 14px;
-    }
-
-    .compact-table th:first-child,
-    .compact-table td:first-child {
-      width: 54%;
-      padding-right: 22px;
-    }
-
-    .compact-table th:nth-child(2),
-    .compact-table td:nth-child(2),
-    .compact-table th:nth-child(3),
-    .compact-table td:nth-child(3) {
-      width: 23%;
-      padding-left: 16px;
-      padding-right: 16px;
-      white-space: nowrap;
-      border-left: 1px solid #edf1f6;
-    }
-
-    .compact-figure {
-      align-self: center;
-    }
-    .paper-figure {
+.paper-figure {
       margin: 0;
       border: 1px solid #e5eaf2;
       border-radius: 20px;
@@ -868,8 +834,7 @@ h2 {
       background: #fff;
     }
     .paper-figure img { width: 100%; height: auto; border-radius: 12px; }
-    .compact-figure img { min-height: 285px; object-fit: contain; }
-    .full-figure { max-width: 1160px; margin: 0 auto; }
+.full-figure { max-width: 1160px; margin: 0 auto; }
     .full-figure img { max-height: 465px; object-fit: contain; }
     .architecture-upload { border: 0; border-radius: 10px; }
 .realworld-tables { display: grid; gap: 24px; }
@@ -940,7 +905,6 @@ h2 {
     }
 
     @media (max-width: 980px) {
-      .feature-split { grid-template-columns: 1fr; }
       .latency-spotlight { min-width: 0; }
       .demo-grid-inline { grid-template-columns: 1fr; }
     }
@@ -958,31 +922,101 @@ h2 {
       .latency-spotlight { width: max-content; max-width: 100%; }
       .subsection-title-row > div:first-child { align-items: flex-start; }
       .research-table { font-size: 13px; }
-      .compact-table { font-size: 12px; }
-      .compact-table th,
-      .compact-table td { padding: 8px 8px; }
-      .compact-table th:first-child,
-      .compact-table td:first-child { width: 50%; padding-right: 10px; }
+}
 
-      .custom-video-controls {
-        gap: 5px;
-        min-height: 42px;
-        padding: 7px 8px;
+
+    .feature-intro {
+      max-width: 920px;
+      margin: -4px 0 22px;
+      color: #344054;
+      font-size: 15.5px;
+      line-height: 1.68;
+      font-weight: 500;
+    }
+
+    .latency-feature-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.10fr) minmax(320px, 0.90fr);
+      gap: 26px;
+      align-items: center;
+    }
+
+    .latency-table-panel {
+      min-width: 0;
+    }
+
+    .latency-table-card {
+      overflow: hidden;
+    }
+
+    .latency-table {
+      min-width: 0;
+      table-layout: fixed;
+      font-size: 12.6px;
+    }
+
+    .latency-table th,
+    .latency-table td {
+      padding: 13px 8px;
+      line-height: 1.38;
+    }
+
+    .latency-table th:first-child,
+    .latency-table td:first-child {
+      width: 32%;
+      text-align: left;
+    }
+
+    .latency-table th:nth-child(2),
+    .latency-table td:nth-child(2),
+    .latency-table th:nth-child(3),
+    .latency-table td:nth-child(3) {
+      width: 22%;
+    }
+
+    .latency-table th:nth-child(4),
+    .latency-table td:nth-child(4) {
+      width: 24%;
+    }
+
+    .latency-figure {
+      width: min(100%, 390px);
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .latency-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .acwm-figure {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .acwm-figure img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    @media (max-width: 980px) {
+      .latency-feature-grid {
+        grid-template-columns: 1fr;
       }
-      .video-time { display: none; }
-      .video-speed-select { width: 50px; }
-      .video-control-button { width: 27px; height: 27px; }
-      .compact-table th:nth-child(2),
-      .compact-table td:nth-child(2),
-      .compact-table th:nth-child(3),
-      .compact-table td:nth-child(3) {
-        width: 25%;
-        padding-left: 8px;
-        padding-right: 8px;
+
+      .latency-figure {
+        max-width: 620px;
+        margin: 0 auto;
       }
     }
 
-  </style>
+</style>
 </head>
 <body>
 <nav aria-label="Primary navigation" class="topbar">
@@ -1014,13 +1048,13 @@ h2 {
 <img alt="" aria-hidden="true" class="hero-logo-symbol" src="assets/img/gigaai-symbol.min.svg"/>
 <img alt="GigaAI" class="hero-logo-wordmark" src="assets/img/gigaai-wordmark.min.svg"/>
 </div>
-<h1><span class="hero-title-main">GigaWorld-Policy-<span class="version-highlight">0.5</span>:</span><span class="hero-title-sub">An Enhanced Framework for Action-Centered World Action Models</span></h1>
-<p class="subtitle">An enhanced action-centered WAM designed for more efficient robot control.</p>
+<h1><span class="hero-title-main">GigaWorld-Policy-<span class="version-highlight">0.5</span>:</span><span class="hero-title-sub">A Faster and Stronger WAM Empowered by AutoResearch</span></h1>
+<p class="subtitle">A World Action Model enabling local real-time deployment with 85ms low latency.</p>
 <div class="affiliation">GigaAI</div>
 <div aria-label="Project links" class="hero-actions">
 <a class="pill primary" href="#" title="arXiv(PDF)"><span class="arxiv-badge">arXiv</span><span>Paper (PDF)</span></a>
 <a class="pill" href="https://github.com/open-gigaai/giga-world-policy" title="GitHub(repo)"><span aria-hidden="true" class="icon"><svg class="github-icon" role="img" viewbox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.01c-3.2.7-3.87-1.38-3.87-1.38-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.11-.75.41-1.26.74-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .98-.31 3.18 1.18A11.1 11.1 0 0 1 12 6.16c.98 0 1.96.13 2.88.39 2.2-1.49 3.17-1.18 3.17-1.18.64 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.42-2.69 5.39-5.26 5.67.42.36.79 1.07.79 2.16v3.03c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path></svg></span><span>Code</span></a>
-<a class="pill" href="#" title="HugingFace(model)"><span aria-hidden="true" class="icon">🤗</span><span>Model</span></a>
+<a class="pill" href="https://huggingface.co/open-gigaai/Giga-World-Policy-0.5" rel="noopener noreferrer" target="_blank" title="View the model on Hugging Face"><span aria-hidden="true" class="icon">🤗</span><span>Model</span></a>
 <a class="pill" href="#project-video" title="View the project video"><span aria-hidden="true" class="icon"><svg class="video-icon" role="img" viewbox="0 0 24 24"><rect height="14" rx="3.2" width="17" x="3.5" y="5"></rect><path d="M10 9.2v5.6l5-2.8-5-2.8Z" fill="currentColor" stroke="none"></path></svg></span><span>Video</span></a>
 </div>
 </div>
@@ -1028,7 +1062,7 @@ h2 {
 <main>
 <section aria-label="Project video" class="section promo-section" data-section="project-video" id="project-video">
 <div class="promo-video-wrap">
-<div class="video-player"><video aria-label="Video player 1" class="promo-video" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0">
+<div class="video-player"><video aria-label="Video player 1" class="promo-video" data-autoplay-mode="sound" data-first-frame="" playsinline="" preload="auto" tabindex="0">
 <source src="assets/videos/promo.mp4#t=0.001" type="video/mp4"/>
 </video><div class="custom-video-controls" data-video-controls="">
 <button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
@@ -1042,7 +1076,7 @@ h2 {
 <option value="1.5">1.5×</option>
 <option value="2">2×</option>
 </select>
-<button aria-label="Unmute video" class="video-control-button" data-action="mute" title="Unmute" type="button"><svg aria-hidden="true" class="volume-icon is-muted" data-volume-icon="" viewbox="0 0 24 24">
+<button aria-label="Mute video" class="video-control-button" data-action="mute" title="Mute" type="button"><svg aria-hidden="true" class="volume-icon" data-volume-icon="" viewbox="0 0 24 24">
 <path class="speaker-shape" d="M4 9h4l5-4v14l-5-4H4z"></path>
 <path class="sound-wave" d="M16.2 9.2c1.25 1.45 1.25 4.15 0 5.6"></path>
 <path class="mute-mark" d="M17.2 9.2l4.8 5.6M22 9.2l-4.8 5.6"></path>
@@ -1067,9 +1101,7 @@ h2 {
 <section class="section" data-section="abstract" id="abstract">
 <div class="section-inner">
 <div class="page-title"><h2>Abstract</h2></div>
-<div class="abstract-only">
-<p class="placeholder-text"><strong>World Action Models (WAMs)</strong> improve robot policy learning by jointly modeling robot actions and <strong>future visual observations</strong>, allowing future scene evolution to provide dense supervision for physically grounded action generation. However, many WAMs require explicit future-video generation or predictive rollout during inference, leading to high computational cost and limiting real-time closed-loop deployment. <strong>GigaWorld-Policy</strong> addresses this issue with an action-centered formulation, where future visual dynamics are used during training while action-only decoding is used at inference time. Building upon this framework, we present <strong>GigaWorld-Policy-0.5</strong>, an enhanced action-centered WAM designed for more efficient robot control. <strong>GigaWorld-Policy-0.5</strong> introduces a <strong>Mixture-of-Transformers</strong> architecture that separates visual dynamics modeling and action generation into specialized experts, reducing active computation during <strong>action-only inference</strong>. During pretraining, we further combine <strong>action-conditioned world modeling</strong> with WAM training to strengthen the coupling between visual dynamics and robot actions. In addition, we employ an agent-based <strong>AutoResearch</strong> pipeline to systematically search training configurations and derive a reliable training recipe with reduced manual intervention. Experiments and ablations show that <strong>GigaWorld-Policy-0.5</strong> preserves the training benefits of future visual dynamics while improving inference efficiency for robot control.</p>
-</div>
+<div class="abstract-only"><p class="placeholder-text"><strong>World Action Models (WAMs)</strong> improve robot policy learning by jointly modeling actions and future visual observations, using future scene evolution as dense supervision for physically grounded action generation. However, a common design in existing WAMs is to explicitly generate future videos at inference time, incurring substantial computational overhead and hindering real-time closed-loop deployment. <strong>GigaWorld-Policy</strong> addresses this issue with an action-centered formulation, where future visual dynamics are used during training while action-only decoding is used at inference time. Building upon this framework, we present <strong>GigaWorld-Policy-0.5</strong>, an enhanced action-centered WAM designed for more efficient robot control. During pretraining, <strong>GigaWorld-Policy-0.5</strong> adopts a mixed <strong>Action-Conditioned World Modeling (AC-WM)</strong> and WAM training strategy. This strengthens the coupling between visual dynamics and robot actions and improves the transferability of action representations for downstream policy learning. For efficient inference, <strong>GigaWorld-Policy-0.5</strong> introduces a <strong>Mixture-of-Transformers</strong> architecture that separates visual dynamics modeling and action generation into specialized experts, reducing active computation during action-only inference and achieving <strong>85 ms inference latency</strong> on a local RTX 4090 setup. In addition, we employ an agent-based <strong>AutoResearch</strong> pipeline to systematically search training configurations, enabling more efficient identification of optimal experimental setups while reducing the time and manual intervention required for hyperparameter tuning. Experiments and ablations show that <strong>GigaWorld-Policy-0.5</strong> preserves the training benefits of future visual dynamics while improving inference efficiency for robot control.</p></div>
 </div>
 </section>
 <section class="section alt content-section" data-section="features" id="features">
@@ -1083,69 +1115,58 @@ h2 {
 </div>
 <div aria-label="RTX 4090 latency highlight" class="latency-spotlight">
 <span>Local RTX 4090</span>
-<strong>110 ms</strong>
-<small>edge-side inference latency</small>
+<strong>85 ms</strong>
+<small>C++ deployment latency</small>
 </div>
-</div>
-<p class="paper-caption table-caption"><strong>Table: </strong> Comparison of inference efficiency and downstream performance on RoboTwin.</p><div class="table-card">
-<table aria-label="Inference efficiency comparison" class="research-table">
+</div><p class="feature-intro">The Mixture-of-Transformers architecture separates visual dynamics modeling from action generation, enabling a lightweight action-only pathway for low-latency deployment.</p><div class="latency-feature-grid">
+<div class="latency-table-panel">
+<p class="paper-caption table-caption"><strong>Table 4: </strong>Comparison of inference efficiency and real-robot performance.</p>
+<div class="table-card latency-table-card">
+<table aria-label="Inference efficiency and real-robot performance" class="research-table latency-table">
 <thead>
-<tr><th>Method</th><th>Latency (ms) ↓</th><th>SR on RoboTwin ↑</th><th>SR on RealRobot ↑</th></tr>
+<tr>
+<th>Method</th>
+<th>Latency on<br/>A100 (ms) ↓</th>
+<th>Latency on<br/>RTX 4090 (ms) ↓</th>
+<th>SR on<br/>Real-Robot ↑</th>
+</tr>
 </thead>
 <tbody>
-<tr><td>π0.5</td><td>225</td><td>0.83</td><td>0.76</td></tr>
-<tr><td>Motus</td><td>3231</td><td>0.89</td><td>0.80</td></tr>
-<tr><td>FastWAM</td><td>229</td><td>0.92</td><td>0.78</td></tr>
-<tr><td>GigaWorld-Policy</td><td>360</td><td>0.87</td><td>0.80</td></tr>
-<tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td><strong>189</strong></td><td>–</td><td><strong>0.85</strong></td></tr>
+<tr><td>π0.5</td><td>225</td><td>110</td><td>0.76</td></tr>
+<tr><td>Motus</td><td>3231</td><td>–</td><td>0.80</td></tr>
+<tr><td>FastWAM</td><td>229</td><td>182</td><td>0.78</td></tr>
+<tr><td>GigaWorld-Policy</td><td>360</td><td>293</td><td>0.80</td></tr>
+<tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td>189</td><td>110</td><td><strong>0.85</strong></td></tr>
+<tr class="average-row best-row"><td>+ C++ deployment</td><td><strong>140</strong></td><td><strong>85</strong></td><td><strong>0.85</strong></td></tr>
 </tbody>
 </table>
 </div>
-</article>
+</div>
+<figure class="paper-figure latency-figure">
+<img alt="Inference latency and success-rate comparison across A100 and RTX 4090 hardware" src="assets/img/figure1-inference-latency.png"/>
+<figcaption><strong>Figure 1: </strong>Comparison of GigaWorld-Policy-0.5 with baselines on inference latency and success rate across hardware platforms in real-world settings.</figcaption>
+</figure>
+</div></article>
 <article class="paper-block">
 <div class="subsection-title-row simple">
 <div>
 <span class="section-index">02</span>
-<h3>Action-Conditioned World-Model Training</h3>
+<h3>Mixed AC-WM and WAM Pre-training</h3>
 </div>
-</div>
-<div class="feature-split">
-<div>
-<p class="paper-caption table-caption"><strong>Table: </strong> Ablation study of mixed AC-WM training on RoboTwin.</p><div class="table-card compact-table-card">
-<table aria-label="AC-WM ablation on RoboTwin" class="research-table compact-table">
-<thead><tr><th>Task</th><th>w/o AC-WM</th><th>w/ AC-WM</th></tr></thead>
-<tbody>
-<tr><td>blocks_ranking_rgb</td><td>0.46</td><td class="gain">0.90</td></tr>
-<tr><td>blocks_ranking_size</td><td>0.70</td><td class="gain">0.88</td></tr>
-<tr><td>click_alarmclock</td><td>0.96</td><td>0.94</td></tr>
-<tr><td>click_bell</td><td>0.98</td><td>0.98</td></tr>
-<tr><td>dump_bin_bigbin</td><td>0.92</td><td class="gain">0.98</td></tr>
-<tr><td>grab_roller</td><td>0.92</td><td>0.94</td></tr>
-<tr><td>handover_block</td><td>0.48</td><td>0.46</td></tr>
-<tr><td>handover_mic</td><td>0.78</td><td class="gain">0.90</td></tr>
-<tr><td>hanging_mug</td><td>0.42</td><td class="gain">0.54</td></tr>
-<tr><td>lift_pot</td><td>0.70</td><td class="gain">0.92</td></tr>
-<tr class="average-row"><td>Average</td><td>0.73</td><td>0.84</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-<figure class="paper-figure compact-figure">
-<img alt="Success rates at different training steps in the AC-WM ablation study" src="assets/img/figure5-acwm-hd.png"/>
-<figcaption><strong>Figure: </strong> Success rates at different training steps in the AC-WM ablation study on RoboTwin.</figcaption>
-</figure>
-</div>
-</article>
+</div><p class="feature-intro">Mixed AC-WM and WAM pre-training strengthens action-dynamics coupling and improves the transferability of action representations.</p><figure class="paper-figure acwm-figure">
+<img alt="Success rates at different training steps in the mixed AC-WM and WAM pretraining ablation" src="assets/img/figure6-acwm-ablation.png"/>
+<figcaption><strong>Figure 6: </strong>Success rates at different training steps in the AC-WM ablation study.</figcaption>
+</figure></article>
 <article class="paper-block">
 <div class="subsection-title-row simple">
 <div>
 <span class="section-index">03</span>
 <h3>AutoResearch-Driven Hyperparameter Study</h3>
 </div>
-</div>
+</div><p class="feature-intro">AutoResearch automates pilot runs, metric monitoring, and candidate selection to derive a reliable training recipe with less manual tuning.</p>
 <figure class="paper-figure full-figure">
 <img alt="AutoResearch hyperparameter search and training progression" src="assets/img/figure6-autoresearch-hd.png"/>
-<figcaption><strong>Figure: </strong> AutoResearch hyperparameter search and training progression on the <em>pick the fruit</em> task. Left: 1K-step pilot sweep over learning-rate and batch-size configurations. Right: extended training progression under the selected configuration, with the best validation action MSE at 30K steps.</figcaption>
+<figcaption><span><strong>Figure 7: </strong>AutoResearch hyperparameter search and training progression on the <em>pick the fruit</em> task. Left: 1K-step pilot sweep over learning-rate and batch-size configurations. Right: extended training progression under the selected configuration, with the best validation action MSE at 30K steps.</span></figcaption>
 </figure>
 </article>
 </div>
@@ -1155,16 +1176,17 @@ h2 {
 <div class="page-title"><h2>Experiments</h2></div>
 <article class="paper-block realworld-results-block">
 <div class="subsection-title-row simple">
-<div><span class="section-index">01</span><h3>Real-World Results</h3></div>
+<div><span class="section-index">01</span><h3>Long-Horizon Tasks</h3></div>
 </div><div class="long-horizon-layout">
 <div class="result-table-group compact-long-table">
-<p class="paper-caption table-caption"><strong>Table: </strong> Evaluation of end-to-end success rates on long-horizon tasks.</p><div class="table-card">
+<p class="paper-caption table-caption"><strong>Table 3: </strong>Evaluation of end-to-end success rates on long-horizon tasks.</p><div class="table-card">
 <table aria-label="Long-horizon task success rates" class="research-table">
 <thead><tr><th>Task name</th><th>π0.5</th><th>Motus</th><th>FastWAM</th><th>GigaWorld-Policy</th><th>GigaWorld-Policy-0.5</th></tr></thead>
 <tbody>
-<tr><td>Heating Food</td><td>0.50</td><td>0.60</td><td>0.50</td><td>0.60</td><td class="best-cell">0.80</td></tr>
+<tr><td>Food Heating</td><td>0.50</td><td>0.60</td><td>0.50</td><td>0.60</td><td class="best-cell">0.80</td></tr>
 <tr><td>Solid Weighing</td><td>0.30</td><td>0.50</td><td>0.40</td><td>0.40</td><td class="best-cell">0.70</td></tr>
 <tr><td>Tableware Arrangement</td><td>0.70</td><td>0.60</td><td>0.50</td><td>0.60</td><td class="best-cell">0.80</td></tr>
+<tr class="average-row"><td>Average</td><td>0.50</td><td>0.57</td><td>0.47</td><td>0.53</td><td class="best-cell">0.77</td></tr>
 </tbody>
 </table>
 </div>
@@ -1173,7 +1195,7 @@ h2 {
 <h3>Demos</h3>
 <div class="demo-grid-inline">
 <article class="demo-card-inline">
-<div class="video-player"><video aria-label="Video player 2" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-1.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<div class="video-player"><video aria-label="Video player 2" class="demo-video-inline" data-autoplay-mode="muted" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-1.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
 <button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
 <span aria-hidden="true" data-play-icon="">▶</span>
 </button>
@@ -1192,7 +1214,7 @@ h2 {
 <div class="demo-meta"><h4>Heating Food</h4></div>
 </article>
 <article class="demo-card-inline">
-<div class="video-player"><video aria-label="Video player 3" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-2.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<div class="video-player"><video aria-label="Video player 3" class="demo-video-inline" data-autoplay-mode="muted" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-2.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
 <button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
 <span aria-hidden="true" data-play-icon="">▶</span>
 </button>
@@ -1211,7 +1233,7 @@ h2 {
 <div class="demo-meta"><h4>Solid Weighing</h4></div>
 </article>
 <article class="demo-card-inline">
-<div class="video-player"><video aria-label="Video player 4" class="demo-video-inline" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-3.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
+<div class="video-player"><video aria-label="Video player 4" class="demo-video-inline" data-autoplay-mode="muted" data-first-frame="" muted="" playsinline="" preload="auto" tabindex="0"><source src="assets/videos/demo-3.mp4#t=0.001" type="video/mp4"/></video><div class="custom-video-controls" data-video-controls="">
 <button aria-label="Play video" class="video-control-button" data-action="play" title="Play" type="button">
 <span aria-hidden="true" data-play-icon="">▶</span>
 </button>
@@ -1234,7 +1256,7 @@ h2 {
 </article><article class="paper-block text-following-block"><div class="subsection-title-row simple">
 <div>
 <span class="section-index">02</span>
-<h3>Text-Following Ability</h3>
+<h3>Text-Following Tasks</h3>
 </div>
 </div><div class="realworld-tables">
 <div class="result-table-group">
@@ -1250,7 +1272,7 @@ h2 {
 <tr><td>Pick the grape and place it into the basket.</td><td>0.85</td><td>0.83</td><td>0.88</td><td>0.88</td><td class="best-cell">0.93</td></tr>
 <tr><td>Pick the avocado and place it into the basket.</td><td>0.68</td><td>0.70</td><td>0.75</td><td>0.73</td><td class="best-cell">0.78</td></tr>
 <tr><td>Pick the strawberry and place it into the basket.</td><td>0.78</td><td>0.80</td><td>0.73</td><td>0.78</td><td class="best-cell">0.85</td></tr>
-<tr class="average-row"><td>Average</td><td>0.76</td><td>0.80</td><td>0.78</td><td>0.80</td><td>0.85</td></tr>
+<tr class="average-row"><td>Average</td><td>0.76</td><td>0.80</td><td>0.78</td><td>0.80</td><td class="best-cell">0.85</td></tr>
 </tbody>
 </table>
 </div>
@@ -1268,7 +1290,7 @@ h2 {
 <tr><td>Pick up the bowl and place it into the basket.</td><td>0.75</td><td>0.83</td><td>0.80</td><td>0.88</td><td class="best-cell">0.95</td></tr>
 <tr><td>Pick up the fork and place it into the basket.</td><td>0.65</td><td>0.75</td><td>0.68</td><td>0.78</td><td class="best-cell">0.85</td></tr>
 <tr><td>Pick up the spoon and place it into the basket.</td><td>0.80</td><td>0.85</td><td>0.75</td><td>0.83</td><td class="best-cell">0.88</td></tr>
-<tr class="average-row"><td>Average</td><td>0.76</td><td>0.83</td><td>0.77</td><td>0.81</td><td>0.89</td></tr>
+<tr class="average-row"><td>Average</td><td>0.76</td><td>0.83</td><td>0.77</td><td>0.81</td><td class="best-cell">0.89</td></tr>
 </tbody>
 </table>
 </div>
@@ -1281,7 +1303,7 @@ h2 {
 <div class="page-title"><h2>Citation</h2></div>
 <div class="citation-box">
 <pre>@article{gigaworld-policy-0.5,
-  title={GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Model},
+  title={GigaWorld-Policy-0.5: A Faster and Stronger WAM Empowered by AutoResearch},
   author={GigaAI},
   journal={arXiv},
   year={2026}
@@ -1411,6 +1433,7 @@ h2 {
       if (muteButton) {
         muteButton.addEventListener('click', () => {
           video.muted = !video.muted;
+          video.dataset.userMuted = video.muted ? 'true' : 'false';
           updateVolumeState();
         });
         video.addEventListener('volumechange', updateVolumeState);
@@ -1442,6 +1465,127 @@ h2 {
       applyPlaybackRate();
     });
 
-  </script>
+
+    const observedAutoplayVideos = Array.from(
+      document.querySelectorAll('#project-video video, .demos-inline video')
+    );
+
+    const isVideoVisibleEnough = (video) => {
+      const rect = video.getBoundingClientRect();
+      const viewportHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const visibleTop = Math.max(rect.top, 0);
+      const visibleBottom = Math.min(rect.bottom, viewportHeight);
+      const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+      return rect.height > 0 && visibleHeight / rect.height >= 0.38;
+    };
+
+    const tryViewportAutoplay = async (video) => {
+      if (!isVideoVisibleEnough(video) || document.hidden) return;
+
+      const wantsSound =
+        video.dataset.autoplayMode === 'sound' &&
+        video.dataset.userMuted !== 'true';
+
+      if (video.ended) video.currentTime = 0;
+
+      if (video.dataset.autoplayMode === 'muted') {
+        video.muted = true;
+      } else if (wantsSound) {
+        video.muted = false;
+        video.volume = 1;
+      }
+
+      try {
+        await video.play();
+        video.dataset.autoplayFallback = 'false';
+      } catch (_) {
+        // Autoplay with sound may be blocked before the first user gesture.
+        // Fall back to muted playback so the video still starts reliably.
+        if (video.dataset.autoplayMode === 'sound') {
+          video.muted = true;
+          video.dataset.autoplayFallback = 'true';
+          try { await video.play(); } catch (_) {}
+        }
+      }
+    };
+
+    const refreshViewportAutoplay = () => {
+      observedAutoplayVideos.forEach((video) => {
+        if (isVideoVisibleEnough(video) && !document.hidden) {
+          tryViewportAutoplay(video);
+        } else {
+          video.pause();
+        }
+      });
+    };
+
+    const viewportVideoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.30) {
+          tryViewportAutoplay(video);
+        } else if (!entry.isIntersecting || entry.intersectionRatio < 0.08) {
+          video.pause();
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '-6% 0px -10% 0px',
+      threshold: [0, 0.08, 0.20, 0.30, 0.45, 0.65]
+    });
+
+    observedAutoplayVideos.forEach((video) => {
+      viewportVideoObserver.observe(video);
+      video.addEventListener('canplay', () => tryViewportAutoplay(video));
+      video.addEventListener('loadeddata', () => tryViewportAutoplay(video));
+    });
+
+    let autoplayRefreshTimer = null;
+    const scheduleAutoplayRefresh = () => {
+      window.clearTimeout(autoplayRefreshTimer);
+      autoplayRefreshTimer = window.setTimeout(refreshViewportAutoplay, 120);
+    };
+
+    window.addEventListener('scroll', scheduleAutoplayRefresh, { passive: true });
+    window.addEventListener('resize', scheduleAutoplayRefresh, { passive: true });
+    window.addEventListener('pageshow', () => {
+      window.setTimeout(refreshViewportAutoplay, 80);
+      window.setTimeout(refreshViewportAutoplay, 650);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        observedAutoplayVideos.forEach((video) => video.pause());
+      } else {
+        refreshViewportAutoplay();
+      }
+    });
+
+    // Retry with sound after the first user gesture when Project Video is visible.
+    const unlockProjectVideoSound = () => {
+      const projectVideo = document.querySelector('#project-video video');
+      if (
+        projectVideo &&
+        projectVideo.dataset.userMuted !== 'true' &&
+        isVideoVisibleEnough(projectVideo)
+      ) {
+        projectVideo.muted = false;
+        projectVideo.volume = 1;
+        projectVideo.play().catch(() => {});
+      }
+    };
+
+    ['pointerdown', 'keydown', 'touchstart'].forEach((eventName) => {
+      document.addEventListener(eventName, unlockProjectVideoSound, {
+        once: true,
+        passive: true
+      });
+    });
+
+    window.setTimeout(refreshViewportAutoplay, 160);
+    window.setTimeout(refreshViewportAutoplay, 900);
+
+</script>
 </body>
 </html>
