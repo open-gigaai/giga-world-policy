@@ -1,14 +1,14 @@
-# GigaWorld-Policy-0.5
+# GigaWorld-Policy-0.5: A Faster and Stronger WAM Empowered by AutoResearch
 
-> **GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Model**
+A World Action Model enabling local real-time deployment with 85ms low latency.
 
-**arXiv:** Coming soon
-
-**Project Page:** Coming soon
+[![arXiv](https://img.shields.io/badge/arXiv-Coming%20Soon-b31b1b.svg?logo=arxiv)](#)
+[![Project Page](https://img.shields.io/badge/Project-Page-0A66C2?logo=googlechrome&logoColor=white)](https://open-gigaai.github.io/giga-world-policy/)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97_Hugging%20Face-Model-FFD21E)](https://huggingface.co/open-gigaai/Giga-World-Policy-0.5)
 
 ## 📖 Overview
 
-World Action Models (WAMs) improve robot policy learning by jointly modeling robot actions and future visual observations, allowing future scene evolution to provide dense supervision for physically grounded action generation. However, many WAMs require explicit future-video generation or predictive rollout during inference, leading to high computational cost and limiting real-time closed-loop deployment. GigaWorld-Policy addresses this issue with an action-centered formulation, where future visual dynamics are used during training while action-only decoding is used at inference time. Building upon this framework, we present GigaWorld-Policy-0.5, an enhanced action-centered WAM designed for more efficient robot control. GigaWorld-Policy-0.5 introduces a Mixture-of-Transformers architecture that separates visual dynamics modeling and action generation into specialized experts, reducing active computation during action-only inference. During pretraining, we further combine action-conditioned world modeling with WAM training to strengthen the coupling between visual dynamics and robot actions. In addition, we employ an agent-based AutoResearch pipeline to systematically search training configurations and derive a reliable training recipe with reduced manual intervention. Experiments and ablations show that GigaWorld-Policy-0.5 preserves the training benefits of future visual dynamics while improving inference efficiency for robot control.
+World Action Models (WAMs) improve robot policy learning by jointly modeling actions and future visual observations, using future scene evolution as dense supervision for physically grounded action generation. However, a common design in existing WAMs is to explicitly generate future videos at inference time, incurring substantial computational overhead and hindering real-time closed-loop deployment. GigaWorld-Policy addresses this issue with an action-centered formulation, where future visual dynamics are used during training while action-only decoding is used at inference time. Building upon this framework, we present *GigaWorld-Policy-0.5*, an enhanced action-centered WAM designed for more efficient robot control. During pretraining, *GigaWorld-Policy-0.5* adopts a mixed Action-Conditioned World Modeling (AC-WM) and WAM training strategy. This strengthens the coupling between visual dynamics and robot actions and improves the transferability of action representations for downstream policy learning. For efficient inference, *GigaWorld-Policy-0.5* introduces a Mixture-of-Transformers architecture that separates visual dynamics modeling and action generation into specialized experts, reducing active computation during action-only inference and achieving 85 ms inference latency on a local RTX 4090 setup. In addition, we employ an agent-based AutoResearch pipeline to systematically search training configurations, enabling more efficient identification of optimal experimental setups while reducing the time and manual intervention required for hyperparameter tuning. Experiments and ablations show that *GigaWorld-Policy-0.5* preserves the training benefits of future visual dynamics while improving inference efficiency for robot control.
 
 ## 🛠️ Installation
 
@@ -61,7 +61,25 @@ python scripts/compute_t5_embedding.py \
 
 ## 📦 Model Download
 
-Pretrained weights: Coming soon.
+Download the open-sourced pretrained transformer weights from Hugging Face:
+
+```bash
+# Hugging Face CLI
+huggingface-cli download open-gigaai/Giga-World-Policy-0.5 --local-dir ./Giga-World-Policy-0.5
+
+# or Git LFS
+git lfs install
+git clone https://huggingface.co/open-gigaai/Giga-World-Policy-0.5
+```
+
+```python
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="open-gigaai/Giga-World-Policy-0.5",
+    local_dir="./Giga-World-Policy-0.5",
+)
+```
 
 ## 🚀 Training
 
