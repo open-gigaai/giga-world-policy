@@ -807,8 +807,10 @@ h2 {
       font-weight: 850;
       background: rgba(16,185,129,0.105);
     }
-    .ours-row td { background: rgba(57,213,238,0.095); font-weight: 750; }
-    .average-row td { background: #f1f5f9; font-weight: 850; }
+    .ours-row td { background: rgba(57,213,238,0.095); font-weight: inherit; }
+    .ours-row td:first-child { font-weight: 750; }
+    .average-row td { background: #f1f5f9; font-weight: inherit; }
+    .average-row td:first-child { font-weight: 850; }
     .research-table .best-row td {
       color: #087a58;
       font-weight: 850;
@@ -1137,7 +1139,7 @@ h2 {
 <tr><td>FastWAM</td><td>229</td><td>182</td><td>0.78</td></tr>
 <tr><td>GigaWorld-Policy</td><td>360</td><td>293</td><td>0.80</td></tr>
 <tr class="ours-row"><td>GigaWorld-Policy-0.5</td><td>189</td><td>110</td><td><strong>0.85</strong></td></tr>
-<tr class="average-row best-row"><td>+ C++ deployment</td><td><strong>140</strong></td><td><strong>85</strong></td><td><strong>0.85</strong></td></tr>
+<tr class="average-row best-row"><td>&nbsp;&nbsp;+ C++ deployment</td><td><strong>140</strong></td><td><strong>85</strong></td><td><strong>0.85</strong></td></tr>
 </tbody>
 </table>
 </div>
