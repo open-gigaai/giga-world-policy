@@ -160,7 +160,7 @@ cd scripts
 ```bibtex
 @article{gigaworld-policy-0.5,
   title={GigaWorld-Policy-0.5: A Faster and Stronger WAM Empowered by AutoResearch},
-  author={Team, GigaWorld, Ye, Angen, Ma, Angyuan, Wang, Boyuan, Ni, Chaojun, Ye, Fangzheng, Huang, Guan, Li, Guo, Zhao, Guosheng, Yan Haodong and others},
+  author={Team, GigaWorld and Ye, Angen and Ma, Angyuan and Wang, Boyuan and Ni, Chaojun and Ye, Fangzheng and Huang, Guan and Li, Guo and Zhao, Guosheng and Yan, Haodong and others},
   journal={arXiv preprint arXiv:2607.13960},
   year={2026}
 }
