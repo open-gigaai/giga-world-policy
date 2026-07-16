@@ -2,7 +2,7 @@
 
 A World Action Model enabling local real-time deployment with 85ms low latency.
 
-[![arXiv](https://img.shields.io/badge/arXiv-Coming%20Soon-b31b1b.svg?logo=arxiv)](#)
+[![arXiv](https://img.shields.io/badge/arXiv-Paper-b31b1b.svg?logo=arxiv)](https://arxiv.org/abs/2607.13960)
 [![Project Page](https://img.shields.io/badge/Project-Page-0A66C2?logo=googlechrome&logoColor=white)](https://open-gigaai.github.io/giga-world-policy/)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97_Hugging%20Face-Model-FFD21E)](https://huggingface.co/open-gigaai/Giga-World-Policy-0.5)
 
@@ -159,8 +159,8 @@ cd scripts
 ## 📚 Citation
 ```bibtex
 @article{gigaworld-policy-0.5,
-  title={GigaWorld-Policy-0.5: An Enhanced Framework for Action-Centered World Action Model},
-  author={GigaAI},
-  journal={arXiv},
+  title={GigaWorld-Policy-0.5: A Faster and Stronger WAM Empowered by AutoResearch},
+  author={Team, GigaWorld, Ye, Angen, Ma, Angyuan, Wang, Boyuan, Ni, Chaojun, Ye, Fangzheng, Huang, Guan, Li, Guo, Zhao, Guosheng, Yan Haodong and others},
+  journal={arXiv preprint arXiv:2607.13960},
   year={2026}
 }
