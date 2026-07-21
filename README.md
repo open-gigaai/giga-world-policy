@@ -5,6 +5,7 @@ A World Action Model enabling local real-time deployment with 85ms low latency.
 [![arXiv](https://img.shields.io/badge/arXiv-Paper-b31b1b.svg?logo=arxiv)](https://arxiv.org/abs/2607.13960)
 [![Project Page](https://img.shields.io/badge/Project-Page-0A66C2?logo=googlechrome&logoColor=white)](https://open-gigaai.github.io/giga-world-policy/)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97_Hugging%20Face-Model-FFD21E)](https://huggingface.co/open-gigaai/Giga-World-Policy-0.5)
+[![wam.cpp](https://img.shields.io/badge/C%2B%2B-wam.cpp-00599C?logo=cplusplus&logoColor=white)](https://github.com/GigaAI-research/wam.cpp)
 
 ## 📖 Overview
 
@@ -155,6 +156,10 @@ Terminal 2:
 cd scripts
 ./run_inference_openloop_gwp0.sh client
 ```
+
+## ⚡ C++ Inference Runtime ([wam.cpp](https://github.com/GigaAI-research/wam.cpp))
+
+For local real-time deployment, we also provide **[wam.cpp](https://github.com/GigaAI-research/wam.cpp)** — a C++/CUDA inference runtime for World-Action Models. It converts GWP-0.5 checkpoints to GGUF, runs action prediction via a pinned llama.cpp/ggml backend, and keeps server-side compatibility with the open-loop client in this repository.
 
 ## 📚 Citation
 ```bibtex
